@@ -59,19 +59,10 @@ struct ContentView: View {
             }
         }
         .onAppear {
-            loadDownloadedAudios()
+            downloadedAudios.loadDownloadedAudios()
         }
         .sheet(isPresented: $isSheetPresented) {
             DownloadListView(audioManager: audioManager) // Передаем audioManager в DownloadListView
-        }
-    }
-
-    // Загрузка списка аудиофайлов из UserDefaults
-    private func loadDownloadedAudios() {
-        if let data = UserDefaults.standard.data(forKey: "downloadedAudios"),
-           let savedAudios = try? JSONDecoder().decode([DownloadedAudio].self, from: data)
-        {
-            downloadedAudios.items = savedAudios
         }
     }
 }

@@ -7,11 +7,13 @@
 import SwiftUI
 
 struct DeleteButton: View {
+    @EnvironmentObject var downloadedAudios: DownloadedAudios
+    
     let audio: DownloadedAudio
     
     var body: some View {
         Button(action: {
-            deleteAudio(audio)
+            downloadedAudios.deleteAudio(audio)
         }) {
             Image(systemName: "trash")
                 .resizable()
@@ -19,14 +21,5 @@ struct DeleteButton: View {
                 .foregroundColor(.red)
         }
         .buttonStyle(BorderlessButtonStyle())
-    }
-    
-    private func deleteAudio(_ audio: DownloadedAudio) {
-        let fileURL = audio.fileURL
-        do {
-            try FileManager.default.removeItem(at: fileURL)
-        } catch {
-            print("Failed to delete audio: \(error)")
-        }
     }
 }

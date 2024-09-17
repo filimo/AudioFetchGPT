@@ -9,8 +9,11 @@ import SwiftUI
 import AVFAudio
 
 class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
-    @EnvironmentObject var downloadedAudios: DownloadedAudios
-
+    @ObservedObject var downloadedAudios: DownloadedAudios
+    
+    init(downloadedAudios: DownloadedAudios) {
+        self.downloadedAudios = downloadedAudios
+    }
 
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "audioHandler", let audioUrl = message.body as? String {
@@ -32,20 +35,10 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
                 let audioPlayer = try AVAudioPlayer(contentsOf: filePath)
                 let duration = audioPlayer.duration
                 
-                DispatchQueue.main.async {
-                    let newAudio = DownloadedAudio(url: filePath, fileName: fileName, duration: duration)
-                    self.downloadedAudios.items.append(newAudio)
-                    self.saveDownloadedAudios()
-                }
+                self.downloadedAudios.addAudio(filePath: filePath, fileName: fileName, duration: duration)
             } catch {
                 print("Failed to save audio file: \(error)")
             }
         }.resume()
-    }
-
-    private func saveDownloadedAudios() {
-        if let data = try? JSONEncoder().encode(downloadedAudios.items) {
-            UserDefaults.standard.set(data, forKey: "downloadedAudios")
-        }
     }
 }

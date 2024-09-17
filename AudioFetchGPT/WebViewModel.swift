@@ -5,7 +5,6 @@
 //  Created by Viktor Kushnerov on 16.09.24.
 //
 
-
 import SwiftUI
 import WebKit
 
@@ -14,17 +13,17 @@ final class WebViewModel: ObservableObject {
     
     init() {
         self.webView = WKWebView()
+        webView?.isInspectable = true
     }
     
     func configureWebView(url: URL) {
-        guard let webView = self.webView else { return }
-        
-        let contentController = WKUserContentController()
-        let configuration = WKWebViewConfiguration()
-        configuration.userContentController = contentController
+        guard let webView = webView else { return }
         
         let jsScript = """
         (function() {
+        
+            console.log('Start handling /backend-api/synthesize')
+        
             var originalFetch = window.fetch;
             window.fetch = function(input, init) {
                 if (typeof input === 'string' && input.includes('/backend-api/synthesize')) {
@@ -45,9 +44,8 @@ final class WebViewModel: ObservableObject {
         """
         
         let userScript = WKUserScript(source: jsScript, injectionTime: .atDocumentStart, forMainFrameOnly: false)
-        contentController.addUserScript(userScript)
         
-        webView.configuration.userContentController = contentController
+        webView.configuration.userContentController.addUserScript(userScript)
         let request = URLRequest(url: url)
         webView.load(request)
     }
