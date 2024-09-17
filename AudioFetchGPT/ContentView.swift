@@ -11,16 +11,12 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
 
-    @State private var audioPlayer: AVAudioPlayer?
-
-    // Перенос глобальных состояний в ContentView
-    @State private var isPlaying: Bool = false
-    @State private var currentProgress: [UUID: Double] = [:]
-    @State private var currentAudioID: UUID? = nil
+    // Убираем аудио-плеер и другие связанные состояния, так как они теперь в AudioManager
+    @StateObject private var audioManager = AudioManager() // Используем AudioManager
 
     @State private var isSheetPresented = false
-
     @StateObject private var webViewModel = WebViewModel()
+    
     let url = URL(string: "https://chatgpt.com")!
 
     var body: some View {
@@ -66,12 +62,7 @@ struct ContentView: View {
             loadDownloadedAudios()
         }
         .sheet(isPresented: $isSheetPresented) {
-            DownloadListView(
-                audioPlayer: $audioPlayer,
-                isPlaying: $isPlaying,
-                currentProgress: $currentProgress,
-                currentAudioID: $currentAudioID
-            )
+            DownloadListView(audioManager: audioManager) // Передаем audioManager в DownloadListView
         }
     }
 
@@ -84,6 +75,7 @@ struct ContentView: View {
         }
     }
 }
+
 
 #Preview {
     ContentView()
