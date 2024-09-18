@@ -19,15 +19,11 @@ struct AudioRowView: View {
             AudioDetailsView(audio: audio)
 
             Slider(value: Binding(
-                get: { audioManager.currentProgress },
+                get: { audioManager.progressForAudio(audio.id) },
                 set: { newValue in
-                    audioManager.currentProgress = newValue
+                    audioManager.seekAudio(for: audio.id, to: newValue)
                 }
-            ), in: 0 ... 1, onEditingChanged: { isEditing in
-                if !isEditing {
-                    audioManager.seekAudio(for: audio, to: audioManager.currentProgress)
-                }
-            })
+            ), in: 0...1)
 
             HStack {
                 PlayPauseButton(audio: audio, audioManager: audioManager)
@@ -43,8 +39,7 @@ struct AudioRowView: View {
                 }
                 .buttonStyle(BorderlessButtonStyle())
 
-                // show audioManager.currentTime
-                Text(formatTime(audioManager.currentTime))
+                Text(audioManager.currentTimeForAudio(audio.id))
                     .font(.subheadline)
                     .monospacedDigit()
                     .frame(minWidth: 50)
@@ -64,13 +59,6 @@ struct AudioRowView: View {
             }
         }
         .padding(.vertical, 10)
-    }
-
-    private func formatTime(_ time: TimeInterval) -> String {
-        let formatter = DateComponentsFormatter()
-        formatter.allowedUnits = [.minute, .second]
-        formatter.zeroFormattingBehavior = .pad
-        return formatter.string(from: time) ?? "00:00"
     }
 }
 
