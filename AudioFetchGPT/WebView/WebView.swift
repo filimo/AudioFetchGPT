@@ -13,6 +13,10 @@ struct WebView: UIViewRepresentable {
     
     @ObservedObject var viewModel: WebViewModel
     let url: URL
+    
+    // Добавляем новое свойство для поискового запроса
+    @Binding var searchText: String
+    @Binding var searchForward: Bool // Новое свойство для направления поиска
 
     func makeUIView(context: Context) -> WKWebView {
         viewModel.configureWebView(url: url)
@@ -25,7 +29,15 @@ struct WebView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        // Здесь можно обновлять представление WebView, если необходимо
+        // Выполняем поиск при изменении searchText
+        if !searchText.isEmpty {
+            let script = "window.find('\(searchText)', false, \(!searchForward), true)"
+            uiView.evaluateJavaScript(script) { (result, error) in
+                if let error = error {
+                    print("Ошибка поиска: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 
     func makeCoordinator() -> ScriptMessageHandler {
