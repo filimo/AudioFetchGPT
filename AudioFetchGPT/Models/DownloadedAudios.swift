@@ -36,6 +36,9 @@ class DownloadedAudios: ObservableObject {
         items.append(newAudio)
         
         saveDownloadedAudios(items: items)
+        
+        // Отправляем уведомление о завершении загрузки
+        NotificationCenter.default.post(name: .audioDownloadCompleted, object: fileName)
     }
 
     private func saveDownloadedAudios(items: [DownloadedAudio]) {

@@ -83,9 +83,7 @@ class AudioManager: ObservableObject {
     }
 
     func handleAudioFinished() {
-        guard let audio = currentAudio else { return }
         pauseAudio()
-        progressManager.resetProgress(for: audio.id)
         currentAudioID = nil
         currentAudio = nil
         isPlaying = false
