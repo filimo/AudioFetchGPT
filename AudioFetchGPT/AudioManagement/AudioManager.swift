@@ -39,20 +39,22 @@ class AudioManager: ObservableObject {
     func playAudio(for audio: DownloadedAudio) {
         guard playerManager.preparePlayer(for: audio.fileURL) else { return }
         
-        seekAudio(for: audio, to: currentProgress)
-        playerManager.play()
+        if isPlaying {
+            pauseAudio()
+        }
         
-        isPlaying = true
         currentAudioID = audio.id
         currentAudio = audio
+        seekAudio(for: audio, to: currentProgress)
         timerManager.startTimer()
+        playerManager.play()
+        isPlaying = true
     }
 
     func pauseAudio() {
         playerManager.pause()
         isPlaying = false
         timerManager.stopTimer()
-        saveCurrentProgress()
     }
 
     func seekAudio(for audio: DownloadedAudio, to progress: Double) {
@@ -75,19 +77,8 @@ class AudioManager: ObservableObject {
         currentTime = playerManager.currentTime
     }
 
-    private func saveCurrentProgress() {
-        guard let audioID = currentAudioID else { return }
-        let progress = playerManager.currentTime / playerManager.duration
-        progressManager.setProgress(progress, for: audioID)
-        progressManager.setCurrentTime(playerManager.currentTime, for: audioID)
-    }
-
     func handleAudioFinished() {
         pauseAudio()
-        currentAudioID = nil
-        currentAudio = nil
-        isPlaying = false
-        objectWillChange.send()
     }
 
     func currentTimeForAudio(_ audioID: UUID) -> String {
