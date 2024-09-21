@@ -53,4 +53,15 @@ final class WebViewModel: ObservableObject {
     func reload() {
         webView?.reload()
     }
+    
+    func performSearch(text: String, forward: Bool) {
+        if !text.isEmpty, let webView = webView {
+            let script = "window.find('\(text)', false, \(!forward), true)"
+            webView.evaluateJavaScript(script) { (result, error) in
+                if let error = error {
+                    print("Ошибка поиска: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
 }

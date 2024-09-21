@@ -23,17 +23,20 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            WebView(viewModel: webViewModel, url: url, searchText: $searchText, searchForward: $searchForward)
+            WebView(viewModel: webViewModel, url: url)
 
             if isSearchVisible {
                 VStack {
-                    SearchBar(searchText: $searchText, searchForward: $searchForward)
+                    SearchBar(searchText: $searchText, searchForward: $searchForward, performSearch: {
+                        webViewModel.performSearch(text: searchText, forward: searchForward)
+                    })
                     Spacer()
                 }
             }
 
             VStack {
                 Spacer()
+                
                 ControlButtons(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
             }
 

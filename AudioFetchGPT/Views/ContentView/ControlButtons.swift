@@ -49,7 +49,7 @@ struct ControlButtons: View {
                     .foregroundColor(.orange)
             }
         }
-        .padding(.bottom, 20)
+        .padding(.bottom, 10)
         .padding(.trailing, 20)
     }
 }

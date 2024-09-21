@@ -10,6 +10,7 @@ import SwiftUI
 struct SearchBar: View {
     @Binding var searchText: String
     @Binding var searchForward: Bool
+    var performSearch: () -> Void // Новое свойство
     @Environment(\.colorScheme) var colorScheme // Добавляем это свойство
 
     var body: some View {
@@ -31,12 +32,14 @@ struct SearchBar: View {
 
             Button(action: {
                 searchForward = true
+                performSearch()
             }) {
                 Image(systemName: "arrow.down")
             }
 
             Button(action: {
                 searchForward = false
+                performSearch()
             }) {
                 Image(systemName: "arrow.up")
             }
