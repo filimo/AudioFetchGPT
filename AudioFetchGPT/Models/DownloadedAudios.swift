@@ -30,8 +30,8 @@ class DownloadedAudios: ObservableObject {
         }
     }
     
-    func addAudio(filePath: URL, fileName: String, duration: TimeInterval?) {
-        let newAudio = DownloadedAudio(url: filePath, fileName: fileName, duration: duration)
+    func addAudio(filePath: URL, fileName: String, duration: TimeInterval?, dataTestId: String?) {
+        let newAudio = DownloadedAudio(url: filePath, fileName: fileName, duration: duration, dataTestId: dataTestId)
         
         items.append(newAudio)
         

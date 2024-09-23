@@ -11,6 +11,9 @@ struct AudioRowView: View {
     let audio: DownloadedAudio
     @ObservedObject var audioManager: AudioManager
 
+    // close popup
+    @Environment(\.dismiss) var dismiss
+
     var body: some View {
         VStack(alignment: .leading) {
             Text(audio.fileName)
@@ -23,10 +26,22 @@ struct AudioRowView: View {
                 set: { newValue in
                     audioManager.seekAudio(for: audio.id, to: newValue)
                 }
-            ), in: 0...1)
+            ), in: 0 ... 1)
 
             HStack {
                 PlayPauseButton(audio: audio, audioManager: audioManager)
+
+                if let dataTestId = audio.dataTestId {
+                    Button(action: {
+                        audioManager.dataTestId = dataTestId
+                    }) {
+                        Image(systemName: "arrowshape.right.fill")
+                            .resizable()
+                            .frame(width: 30, height: 30)
+                            .foregroundStyle(.green)
+                    }
+                    .buttonStyle(BorderlessButtonStyle())
+                }
 
                 Spacer()
 
@@ -63,6 +78,6 @@ struct AudioRowView: View {
 }
 
 #Preview {
-    AudioRowView(audio: .init(url: URL(string: "111")!, fileName: "1111", duration: 100), audioManager: .init())
+    AudioRowView(audio: .init(url: URL(string: "111")!, fileName: "1111", duration: 100, dataTestId: "conversation-turn-3"), audioManager: .init())
         .padding()
 }

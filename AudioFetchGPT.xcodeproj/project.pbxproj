@@ -10,7 +10,18 @@
 		F071E9EF2C98A48600423E5F /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = F071E9EE2C98A47E00423E5F /* .gitignore */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		F02CB0A02CA097E7006F5441 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F071E9C72C98303900423E5F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F071E9CE2C98303900423E5F;
+			remoteInfo = AudioFetchGPT;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		F02CB09C2CA097E7006F5441 /* AudioFetchGPTTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudioFetchGPTTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F071E9CF2C98303900423E5F /* AudioFetchGPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioFetchGPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F071E9EE2C98A47E00423E5F /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -26,6 +37,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		F02CB09D2CA097E7006F5441 /* AudioFetchGPTTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AudioFetchGPTTests;
+			sourceTree = "<group>";
+		};
 		F071E9D12C98303900423E5F /* AudioFetchGPT */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -37,6 +53,13 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		F02CB0992CA097E7006F5441 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F071E9CC2C98303900423E5F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -52,6 +75,7 @@
 			children = (
 				F071E9EE2C98A47E00423E5F /* .gitignore */,
 				F071E9D12C98303900423E5F /* AudioFetchGPT */,
+				F02CB09D2CA097E7006F5441 /* AudioFetchGPTTests */,
 				F071E9D02C98303900423E5F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -60,6 +84,7 @@
 			isa = PBXGroup;
 			children = (
 				F071E9CF2C98303900423E5F /* AudioFetchGPT.app */,
+				F02CB09C2CA097E7006F5441 /* AudioFetchGPTTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,6 +92,29 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		F02CB09B2CA097E7006F5441 /* AudioFetchGPTTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F02CB0A22CA097E7006F5441 /* Build configuration list for PBXNativeTarget "AudioFetchGPTTests" */;
+			buildPhases = (
+				F02CB0982CA097E7006F5441 /* Sources */,
+				F02CB0992CA097E7006F5441 /* Frameworks */,
+				F02CB09A2CA097E7006F5441 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F02CB0A12CA097E7006F5441 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F02CB09D2CA097E7006F5441 /* AudioFetchGPTTests */,
+			);
+			name = AudioFetchGPTTests;
+			packageProductDependencies = (
+			);
+			productName = AudioFetchGPTTests;
+			productReference = F02CB09C2CA097E7006F5441 /* AudioFetchGPTTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		F071E9CE2C98303900423E5F /* AudioFetchGPT */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F071E9DD2C98303A00423E5F /* Build configuration list for PBXNativeTarget "AudioFetchGPT" */;
@@ -99,6 +147,10 @@
 				LastSwiftUpdateCheck = 1600;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					F02CB09B2CA097E7006F5441 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = F071E9CE2C98303900423E5F;
+					};
 					F071E9CE2C98303900423E5F = {
 						CreatedOnToolsVersion = 16.0;
 					};
@@ -119,11 +171,19 @@
 			projectRoot = "";
 			targets = (
 				F071E9CE2C98303900423E5F /* AudioFetchGPT */,
+				F02CB09B2CA097E7006F5441 /* AudioFetchGPTTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		F02CB09A2CA097E7006F5441 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F071E9CD2C98303900423E5F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -135,6 +195,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		F02CB0982CA097E7006F5441 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F071E9CB2C98303900423E5F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -144,7 +211,51 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		F02CB0A12CA097E7006F5441 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F071E9CE2C98303900423E5F /* AudioFetchGPT */;
+			targetProxy = F02CB0A02CA097E7006F5441 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		F02CB0A32CA097E7006F5441 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B6QRXW5YF2;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = by.filimo.AudioFetchGPTTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AudioFetchGPT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AudioFetchGPT";
+			};
+			name = Debug;
+		};
+		F02CB0A42CA097E7006F5441 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B6QRXW5YF2;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = by.filimo.AudioFetchGPTTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AudioFetchGPT.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AudioFetchGPT";
+			};
+			name = Release;
+		};
 		F071E9DB2C98303A00423E5F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -327,6 +438,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		F02CB0A22CA097E7006F5441 /* Build configuration list for PBXNativeTarget "AudioFetchGPTTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F02CB0A32CA097E7006F5441 /* Debug */,
+				F02CB0A42CA097E7006F5441 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		F071E9CA2C98303900423E5F /* Build configuration list for PBXProject "AudioFetchGPT" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

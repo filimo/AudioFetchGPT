@@ -12,6 +12,7 @@ struct DownloadedAudio: Identifiable, Codable {
     var fileName: String
     var duration: TimeInterval? // Длительность аудио в секундах
     var downloadDate: Date // Время скачивания
+    var dataTestId: String?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -19,14 +20,16 @@ struct DownloadedAudio: Identifiable, Codable {
         case fileName
         case duration
         case downloadDate
+        case dataTestId
     }
 
-    init(id: UUID = UUID(), url: URL, fileName: String, duration: TimeInterval?, downloadDate: Date = Date()) {
+    init(id: UUID = UUID(), url: URL, fileName: String, duration: TimeInterval?, downloadDate: Date = Date(), dataTestId: String?) {
         self.id = id
         self.relativePath = url.lastPathComponent
         self.fileName = fileName
         self.duration = duration
         self.downloadDate = downloadDate
+        self.dataTestId = dataTestId
     }
 
     var fileURL: URL {

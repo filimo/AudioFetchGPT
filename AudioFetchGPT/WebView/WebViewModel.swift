@@ -19,29 +19,7 @@ final class WebViewModel: ObservableObject {
     func configureWebView(url: URL) {
         guard let webView = webView else { return }
         
-        let jsScript = """
-        (function() {
-        
-            console.log('Start handling /backend-api/synthesize')
-        
-            var originalFetch = window.fetch;
-            window.fetch = function(input, init) {
-                if (typeof input === 'string' && input.includes('/backend-api/synthesize')) {
-                    return originalFetch(input, init).then(response => {
-                        response.clone().blob().then(blob => {
-                            var reader = new FileReader();
-                            reader.onloadend = function() {
-                                window.webkit.messageHandlers.audioHandler.postMessage(reader.result);
-                            };
-                            reader.readAsDataURL(blob);
-                        });
-                        return response;
-                    });
-                }
-                return originalFetch(input, init);
-            };
-        })();
-        """
+        let jsScript = try! String(contentsOf: Bundle.main.url(forResource: "script", withExtension: "js")!)
         
         let userScript = WKUserScript(source: jsScript, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         
@@ -57,10 +35,25 @@ final class WebViewModel: ObservableObject {
     func performSearch(text: String, forward: Bool) {
         if !text.isEmpty, let webView = webView {
             let script = "window.find('\(text)', false, \(!forward), true)"
-            webView.evaluateJavaScript(script) { (result, error) in
+            webView.evaluateJavaScript(script) { _, error in
                 if let error = error {
                     print("Ошибка поиска: \(error.localizedDescription)")
                 }
+            }
+        }
+    }
+    
+    func gotoMessage(dataTestId: String) {
+        let scipt = """
+            document.querySelector('[data-testid="\(dataTestId)"]').scrollIntoView({
+                behavior: 'smooth', // Плавная прокрутка
+                block: 'start'      // Прокрутка так, чтобы элемент был в начале видимой области
+            });
+        """
+        
+        webView?.evaluateJavaScript(scipt) { _, error in
+            if let error = error {
+                print("Ошибка перехода: \(error.localizedDescription)")
             }
         }
     }

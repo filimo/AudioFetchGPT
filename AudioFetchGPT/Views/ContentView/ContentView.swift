@@ -36,7 +36,7 @@ struct ContentView: View {
 
             VStack {
                 Spacer()
-                
+
                 ControlButtons(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
             }
 
@@ -55,6 +55,10 @@ struct ContentView: View {
                     showDownloadNotification(for: audioName)
                 }
             }
+        }
+        .onReceive(audioManager.$dataTestId) { dataTestId in
+            webViewModel.gotoMessage(dataTestId: dataTestId)
+            isSheetPresented = false
         }
     }
 
