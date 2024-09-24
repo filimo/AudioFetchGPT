@@ -19,7 +19,8 @@ final class WebViewModel: ObservableObject {
     func configureWebView(url: URL) {
         guard let webView = webView else { return }
         
-        let jsScript = try! String(contentsOf: Bundle.main.url(forResource: "script", withExtension: "js")!)
+        // Start of Selection
+        let jsScript = try! String(contentsOf: Bundle.main.url(forResource: "script", withExtension: "js")!, encoding: .utf8)
         
         let userScript = WKUserScript(source: jsScript, injectionTime: .atDocumentStart, forMainFrameOnly: false)
         
