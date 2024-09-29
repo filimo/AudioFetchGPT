@@ -10,7 +10,7 @@ import SwiftUI
 
 struct DataTestButton: View {
     let dataTestId: String
-    @ObservedObject var audioManager: AudioManager
+    @EnvironmentObject var audioManager: AudioManager
 
     var body: some View {
         Button(action: {
@@ -25,7 +25,3 @@ struct DataTestButton: View {
     }
 }
 
-#Preview {
-    DataTestButton(dataTestId: "example-id", audioManager: AudioManager())
-        .padding()
-}

@@ -12,6 +12,10 @@ class AudioPlayerManager {
     private var audioPlayer: AVAudioPlayer?
     weak var delegate: AudioPlayerDelegate?
 
+    var isPlaying: Bool {
+        return audioPlayer?.isPlaying ?? false
+    }
+
     func preparePlayer(for url: URL) -> Bool {
         guard FileManager.default.fileExists(atPath: url.path) else {
             print("Audio file not found at path: \(url.path)")

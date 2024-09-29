@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct SeekButtonsView: View {
-    @ObservedObject var audioManager: AudioManager
+    @EnvironmentObject var audioManager: AudioManager
     let audio: DownloadedAudio
 
     var body: some View {

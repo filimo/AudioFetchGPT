@@ -8,30 +8,25 @@ import AVFoundation
 import SwiftUI
 
 struct AudioRowView: View {
-    let audio: DownloadedAudio
-    @ObservedObject var audioManager: AudioManager
-
-    // закрыть попап
     @Environment(\.dismiss) var dismiss
+    @EnvironmentObject var audioManager: AudioManager
+
+    let audio: DownloadedAudio
+    @State private var editableName: String = ""
 
     var body: some View {
         VStack(alignment: .leading) {
-            AudioDetailsView(audio: audio)
+            AudioDetailsView(audio: audio, editableName: $editableName)
 
             Slider(value: Binding(
                 get: { audioManager.progressForAudio(audio.id) },
                 set: { newValue in
                     audioManager.seekAudio(for: audio.id, to: newValue)
                 }
-            ), in: 0...1)
+            ), in: 0 ... 1)
 
-            ControlButtonsView(audio: audio, audioManager: audioManager)
+            ControlButtonsView(audio: audio)
         }
         .padding(.vertical, 10)
     }
-}
-
-#Preview {
-    AudioRowView(audio: .init(url: URL(string: "111")!, fileName: "1111", duration: 100, dataTestId: "conversation-turn-3"), audioManager: .init())
-        .padding()
 }

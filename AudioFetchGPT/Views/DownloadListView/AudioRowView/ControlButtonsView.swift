@@ -10,19 +10,18 @@ import SwiftUI
 
 struct ControlButtonsView: View {
     let audio: DownloadedAudio
-    @ObservedObject var audioManager: AudioManager
 
     var body: some View {
         HStack {
-            PlayPauseButton(audio: audio, audioManager: audioManager)
+            PlayPauseButton(audio: audio)
 
             if let dataTestId = audio.dataTestId {
-                DataTestButton(dataTestId: dataTestId, audioManager: audioManager)
+                DataTestButton(dataTestId: dataTestId)
             }
 
             Spacer()
 
-            SeekButtonsView(audioManager: audioManager, audio: audio)
+            SeekButtonsView(audio: audio)
 
             Spacer()
 

@@ -10,8 +10,8 @@ import SwiftUI
 struct AudioDetailsView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
     let audio: DownloadedAudio
-    @State private var editableName: String = ""
     @State private var isEditingName: Bool = false
+    @Binding var editableName: String
 
     var body: some View {
         VStack(alignment: .leading) {

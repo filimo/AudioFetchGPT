@@ -45,7 +45,8 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $isSheetPresented) {
-            DownloadListView(audioManager: audioManager) // Передаем audioManager в DownloadListView
+            DownloadListView()
+                .environmentObject(audioManager)
         }
         .onAppear {
             downloadedAudios.loadDownloadedAudios()

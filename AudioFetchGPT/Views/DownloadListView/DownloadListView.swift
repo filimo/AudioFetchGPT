@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DownloadListView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
-    @ObservedObject var audioManager: AudioManager // Используем AudioManager
     @State private var lastScrolledID: UUID?
 
     var body: some View {
@@ -17,7 +16,7 @@ struct DownloadListView: View {
             ScrollViewReader { proxy in
                 List {
                     ForEach(downloadedAudios.items) { audio in
-                        AudioRowView(audio: audio, audioManager: audioManager)
+                        AudioRowView(audio: audio)
                             .id(audio.id) // Устанавливаем уникальный идентификатор
                             .onAppear {
                                 // Обновляем последний видимый идентификатор
