@@ -18,7 +18,7 @@ class AudioManager: ObservableObject {
     private let progressManager = AudioProgressManager()
     private let timerManager = AudioTimerManager()
     private var currentAudio: DownloadedAudio?
-    
+
     // Добавляем сильную ссылку на делегат
     private var audioPlayerDelegate: AudioPlayerDelegate?
 
@@ -26,7 +26,7 @@ class AudioManager: ObservableObject {
         // Создаем экземпляр делегата и сохраняем сильную ссылку
         audioPlayerDelegate = AudioPlayerDelegate(audioManager: self)
         playerManager.delegate = audioPlayerDelegate
-        
+
         timerManager.updateAction = { [weak self] in
             self?.updateProgress()
         }
@@ -39,11 +39,11 @@ class AudioManager: ObservableObject {
 
     func playAudio(for audio: DownloadedAudio) {
         guard playerManager.preparePlayer(for: audio.fileURL) else { return }
-        
+
         if isPlaying {
             pauseAudio()
         }
-        
+
         currentAudioID = audio.id
         currentAudio = audio
         seekAudio(for: audio, to: currentProgress)
@@ -92,9 +92,10 @@ class AudioManager: ObservableObject {
     }
 
     func seekAudio(for audioID: UUID, to progress: Double) {
-        guard let audio = currentAudio, audio.id == audioID else { return }
         let newTime = progress * playerManager.duration
-        playerManager.seek(to: newTime)
+        if currentAudio?.id == audioID {
+            playerManager.seek(to: newTime)
+        }
         progressManager.setCurrentTime(newTime, for: audioID)
         progressManager.setProgress(progress, for: audioID)
     }

@@ -45,6 +45,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
             do {
                 try data.write(to: filePath)
                 let audioPlayer = try AVAudioPlayer(contentsOf: filePath)
+                
                 let duration = audioPlayer.duration
                 
                 self.downloadedAudios.addAudio(filePath: filePath, fileName: fileName, duration: duration, dataTestId: dataTestId)

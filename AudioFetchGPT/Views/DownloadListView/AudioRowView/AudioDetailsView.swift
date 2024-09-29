@@ -34,10 +34,10 @@ struct AudioDetailsView: View {
             }
 
             HStack {
-                Text("\(formatDate(audio.downloadDate))")
+                Text("\(AudioTimeFormatter.formatDate(audio.downloadDate))")
 
                 if let duration = audio.duration {
-                    Text("Duration: \(formatDuration(duration))")
+                    Text("Duration: \(AudioTimeFormatter.formatTime(duration))")
                 }
                 Spacer()
             }
@@ -47,18 +47,5 @@ struct AudioDetailsView: View {
         .onAppear {
             editableName = downloadedAudios.getName(for: audio.id) ?? audio.fileName
         }
-    }
-
-    private func formatDuration(_ duration: TimeInterval) -> String {
-        let minutes = Int(duration) / 60
-        let seconds = Int(duration) % 60
-        return String(format: "%02d:%02d", minutes, seconds)
-    }
-
-    private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .short
-        formatter.timeStyle = .short
-        return formatter.string(from: date)
     }
 }
