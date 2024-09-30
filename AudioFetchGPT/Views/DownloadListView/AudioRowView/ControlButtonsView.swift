@@ -5,7 +5,6 @@
 //  Created by Viktor Kushnerov on 24.09.24.
 //
 
-
 import SwiftUI
 
 struct ControlButtonsView: View {
@@ -15,9 +14,7 @@ struct ControlButtonsView: View {
         HStack {
             PlayPauseButton(audio: audio)
 
-            if let dataTestId = audio.dataTestId {
-                DataTestButton(dataTestId: dataTestId)
-            }
+            GotoMessageButton(conversationId: audio.conversationId, messageId: audio.messageId)
 
             Spacer()
 
@@ -29,4 +26,3 @@ struct ControlButtonsView: View {
         }
     }
 }
-

@@ -18,12 +18,13 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         if message.name == "audioHandler" {
             if let body = message.body as? [String: Any] {
-                if let dataTestId = body["dataTestId"] as? String,
+                if let conversationId = body["conversationId"] as? String,
+                   let messageId = body["messageId"] as? String,
                    let audioData = body["audioData"] as? String
                 {
-                    print("dataTestId: \(dataTestId)")
+                    print("conversationId: \(conversationId), messageId: \(messageId)")
                         
-                    downloadAudio(from: audioData, dataTestId: dataTestId)
+                    downloadAudio(from: audioData, conversationId: conversationId, messageId: messageId)
                 } else {
                     print("Ошибка: Невозможно извлечь значения из объекта")
                 }
@@ -33,7 +34,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
         }
     }
 
-    private func downloadAudio(from url: String, dataTestId: String) {
+    private func downloadAudio(from url: String, conversationId: String, messageId: String) {
         guard let audioURL = URL(string: url) else { return }
         URLSession.shared.dataTask(with: audioURL) { data, _, error in
             guard let data = data, error == nil else { return }
@@ -48,7 +49,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
                 audioPlayer.prepareToPlay()
                 let duration = audioPlayer.duration
                 
-                self.downloadedAudios.addAudio(filePath: filePath, fileName: fileName, duration: duration, dataTestId: dataTestId)
+                self.downloadedAudios.addAudio(filePath: filePath, fileName: fileName, duration: duration, conversationId: conversationId, messageId: messageId)
             } catch {
                 print("Failed to save audio file: \(error)")
             }

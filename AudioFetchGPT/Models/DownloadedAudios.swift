@@ -32,8 +32,8 @@ class DownloadedAudios: ObservableObject {
         items = filterExistingAudios(from: savedAudios)
     }
     
-    func addAudio(filePath: URL, fileName: String, duration: TimeInterval?, dataTestId: String?) {
-        let newAudio = DownloadedAudio(url: filePath, fileName: fileName, duration: duration, dataTestId: dataTestId)
+    func addAudio(filePath: URL, fileName: String, duration: TimeInterval?, conversationId: String, messageId: String) {
+        let newAudio = DownloadedAudio(url: filePath, fileName: fileName, duration: duration, conversationId: conversationId, messageId: messageId)
         items.append(newAudio)
         saveDownloadedAudios()
         notifyDownloadCompleted(fileName: fileName)

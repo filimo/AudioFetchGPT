@@ -14,7 +14,7 @@ class AudioManager: ObservableObject {
     @Published var isPlaying = false
     @Published var currentAudioID: UUID?
     @Published private(set) var currentTime: Double = 0
-    @Published var dataTestId: String = ""
+    @Published var messageId: String = ""
 
     private let playerManager = AudioPlayerManager()
     private let progressManager = AudioProgressManager()

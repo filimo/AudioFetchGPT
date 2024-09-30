@@ -47,6 +47,7 @@ struct ContentView: View {
         .sheet(isPresented: $isSheetPresented) {
             DownloadListView()
                 .environmentObject(audioManager)
+                .environmentObject(webViewModel)
         }
         .onAppear {
             downloadedAudios.loadDownloadedAudios()
@@ -57,8 +58,7 @@ struct ContentView: View {
                 }
             }
         }
-        .onReceive(audioManager.$dataTestId) { dataTestId in
-            webViewModel.gotoMessage(dataTestId: dataTestId)
+        .onReceive(audioManager.$messageId) { messageId in
             isSheetPresented = false
         }
     }
