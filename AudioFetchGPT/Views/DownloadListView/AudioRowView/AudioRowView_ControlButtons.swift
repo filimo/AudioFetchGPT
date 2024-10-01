@@ -1,5 +1,5 @@
 //
-//  ControlButtonsView.swift
+//  AudioRowView_ControlButtons.swift
 //  AudioFetchGPT
 //
 //  Created by Viktor Kushnerov on 24.09.24.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ControlButtonsView: View {
+struct AudioRowView_ControlButtons: View {
     let audio: DownloadedAudio
 
     var body: some View {
@@ -19,10 +19,6 @@ struct ControlButtonsView: View {
             Spacer()
 
             SeekButtonsView(audio: audio)
-
-            Spacer()
-
-            DeleteButton(audio: audio)
         }
     }
 }

@@ -25,7 +25,7 @@ struct AudioRowView: View {
                 }
             ), in: 0 ... 1)
 
-            ControlButtonsView(audio: audio)
+            AudioRowView_ControlButtons(audio: audio)
         }
         .padding(.vertical, 10)
     }

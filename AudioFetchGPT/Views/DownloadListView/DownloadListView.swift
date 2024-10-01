@@ -22,6 +22,13 @@ struct DownloadListView: View {
                                 // Обновляем последний видимый идентификатор
                                 lastScrolledID = audio.id
                             }
+                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                Button(role: .destructive) {
+                                    deleteAudio(audio)
+                                } label: {
+                                    Label("Удалить", systemImage: "trash")
+                                }
+                            }
                     }
                 }
                 .navigationTitle("Downloaded Audios")
@@ -44,11 +51,14 @@ struct DownloadListView: View {
         .onAppear {
             // Загружаем сохранённый идентификатор при появлении
             if let savedIDString = UserDefaults.standard.string(forKey: "LastScrolledID"),
-               let savedID = UUID(uuidString: savedIDString) {
+               let savedID = UUID(uuidString: savedIDString)
+            {
                 lastScrolledID = savedID
             }
         }
     }
+
+    private func deleteAudio(_ audio: DownloadedAudio) {
+        downloadedAudios.deleteAudio(audio)
+    }
 }
-
-
