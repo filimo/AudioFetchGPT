@@ -20,11 +20,12 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
             if let body = message.body as? [String: Any] {
                 if let conversationId = body["conversationId"] as? String,
                    let messageId = body["messageId"] as? String,
-                   let audioData = body["audioData"] as? String
+                   let audioData = body["audioData"] as? String,
+                   let name = body["name"] as? String
                 {
                     print("conversationId: \(conversationId), messageId: \(messageId)")
                         
-                    downloadAudio(from: audioData, conversationId: conversationId, messageId: messageId)
+                    downloadAudio(from: audioData, conversationId: conversationId, messageId: messageId, name: name)
                 } else {
                     print("Ошибка: Невозможно извлечь значения из объекта")
                 }
@@ -34,14 +35,14 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
         }
     }
 
-    private func downloadAudio(from url: String, conversationId: String, messageId: String) {
+    private func downloadAudio(from url: String, conversationId: String, messageId: String, name: String) {
         guard let audioURL = URL(string: url) else { return }
         URLSession.shared.dataTask(with: audioURL) { data, _, error in
             guard let data = data, error == nil else { return }
             
             let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-            let fileName = "chatgpt_audio_\(UUID().uuidString).m4a"
-            let filePath = documentsPath.appendingPathComponent(fileName)
+            let fileName = UUID().uuidString
+            let filePath = documentsPath.appendingPathComponent(fileName.appending(".m4a"))
             
             do {
                 try data.write(to: filePath)
@@ -49,7 +50,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
                 audioPlayer.prepareToPlay()
                 let duration = audioPlayer.duration
                 
-                self.downloadedAudios.addAudio(filePath: filePath, fileName: fileName, duration: duration, conversationId: conversationId, messageId: messageId)
+                self.downloadedAudios.addAudio(filePath: filePath, fileName: name, duration: duration, conversationId: conversationId, messageId: messageId)
             } catch {
                 print("Failed to save audio file: \(error)")
             }
