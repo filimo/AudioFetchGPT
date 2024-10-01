@@ -119,4 +119,19 @@ final class WebViewModel: ObservableObject {
         // Сбрасываем целевой `messageId`
         targetMessageId = nil
     }
+
+    func sayChatGPT(_ text: String) {
+        guard let jsonData = try? JSONEncoder().encode(text),
+              let jsonString = String(data: jsonData, encoding: .utf8) else {
+            print("Ошибка кодирования текста")
+            return
+        }
+
+        let script = "document.querySelector('#prompt-textarea').innerText = \(jsonString);"
+        webView?.evaluateJavaScript(script) { _, error in
+            if let error = error {
+                print("Ошибка вставки текста: \(error.localizedDescription)")
+            }
+        }
+    }
 }

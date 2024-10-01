@@ -14,6 +14,7 @@ struct NotificationView: View {
         VStack {
             Spacer()
             Text(message)
+                .lineLimit(20)
                 .padding()
                 .background(Color.green)
                 .foregroundColor(.white)

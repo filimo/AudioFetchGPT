@@ -17,6 +17,7 @@ struct ControlButtons: View {
         HStack {
             Spacer()
 
+            // Кнопка обновления
             Button(action: {
                 webViewModel.reload()
             }) {
@@ -27,6 +28,7 @@ struct ControlButtons: View {
             }
             .padding(.trailing, 20)
 
+            // Кнопка загрузки
             Button(action: {
                 isSheetPresented = true
             }) {
@@ -37,6 +39,7 @@ struct ControlButtons: View {
             }
             .padding(.trailing, 20)
 
+            // Кнопка поиска
             Button(action: {
                 isSearchVisible.toggle()
                 if !isSearchVisible {
@@ -48,6 +51,21 @@ struct ControlButtons: View {
                     .frame(width: 30, height: 30)
                     .foregroundColor(.orange)
             }
+            .padding(.trailing, 20)
+            
+            // Новая кнопка отправки из буфера обмена
+            Button(action: {
+                if let clipboardText = UIPasteboard.general.string {
+                    webViewModel.sayChatGPT(clipboardText)
+                }
+            }) {
+                Image(systemName: "paperplane.circle.fill")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(.purple)
+            }
+            .padding(.trailing, 20)
+            .accessibilityLabel("Отправить из буфера обмена")
         }
         .padding(.bottom, 10)
         .padding(.trailing, 20)
