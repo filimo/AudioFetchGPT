@@ -65,7 +65,7 @@ struct ContentView: View {
 
     // Функция для показа уведомления
     private func showDownloadNotification(for audioName: String) {
-        notificationMessage = "Аудио '\(audioName)' успешно скачано"
+        notificationMessage = audioName
         showNotification = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
             showNotification = false

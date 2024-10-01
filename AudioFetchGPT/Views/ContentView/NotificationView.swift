@@ -19,6 +19,7 @@ struct NotificationView: View {
                 .foregroundColor(.white)
                 .cornerRadius(10)
                 .transition(.scale)
+            Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.5))

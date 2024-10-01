@@ -15,23 +15,14 @@ struct AudioDetailsView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            if isEditingName {
-                TextField("Название аудио", text: $editableName, onCommit: {
-                    downloadedAudios.saveName(for: audio.id, name: editableName)
-                    isEditingName = false
-                })
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+            Text(editableName)
+                .font(.headline)
+                .truncationMode(.tail)
+                .lineLimit(1)
                 .padding(.bottom, 5)
-            } else {
-                Text(editableName)
-                    .font(.headline)
-                    .truncationMode(.middle) // Использование нативного метода обрезки середины
-                    .lineLimit(1) // Ограничение до одной строки
-                    .padding(.bottom, 5)
-                    .onTapGesture {
-                        isEditingName = true
-                    }
-            }
+                .onTapGesture {
+                    isEditingName = true
+                }
 
             HStack {
                 Text("\(AudioTimeFormatter.formatDate(audio.downloadDate))")
@@ -46,6 +37,31 @@ struct AudioDetailsView: View {
         }
         .onAppear {
             editableName = downloadedAudios.getName(for: audio.id) ?? audio.fileName
+        }
+        .sheet(isPresented: $isEditingName) {
+            VStack {
+                TextEditor(text: $editableName)
+                    .padding()
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                    )
+                    .padding()
+
+                Button(action: {
+                    downloadedAudios.saveName(for: audio.id, name: editableName)
+                    isEditingName = false
+                }) {
+                    Text("Готово")
+                        .foregroundColor(.blue)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.gray.opacity(0.2))
+                        .cornerRadius(8)
+                }
+                .padding([.horizontal, .bottom])
+            }
+            .padding()
         }
     }
 }
