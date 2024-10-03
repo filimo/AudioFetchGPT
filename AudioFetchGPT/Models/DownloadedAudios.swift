@@ -45,24 +45,17 @@ class DownloadedAudios: ObservableObject {
             if let index = items.firstIndex(where: { $0.id == audio.id }) {
                 items.remove(at: index)
                 saveDownloadedAudios()
-                
-                // Удаление из savedMetaData
-                removeName(for: audio.id)
             }
         } catch {
             print("Не удалось удалить аудио: \(error)")
         }
     }
     
-    func saveName(for uuid: UUID, name: String) {
-        var metadata = currentMetadata()
-        metadata[uuid.uuidString] = name
-        updateMetadata(with: metadata)
-    }
-    
-    func getName(for uuid: UUID) -> String? {
-        let metadata = currentMetadata()
-        return metadata[uuid.uuidString]
+    func updateFileName(for uuid: UUID, name: String) {
+        if let index = items.firstIndex(where: { $0.id == uuid }) {
+            items[index].fileName = name
+            saveDownloadedAudios()
+        }
     }
     
     // MARK: - Private Methods
@@ -81,26 +74,5 @@ class DownloadedAudios: ObservableObject {
     
     private func notifyDownloadCompleted(fileName: String) {
         NotificationCenter.default.post(name: .audioDownloadCompleted, object: fileName)
-    }
-    
-    private func currentMetadata() -> [String: String] {
-        guard let data = savedMetaData.data(using: .utf8),
-              let decoded = try? JSONDecoder().decode([String: String].self, from: data) else {
-            return [:]
-        }
-        return decoded
-    }
-    
-    private func updateMetadata(with metadata: [String: String]) {
-        if let encodedData = try? JSONEncoder().encode(metadata),
-           let jsonString = String(data: encodedData, encoding: .utf8) {
-            savedMetaData = jsonString
-        }
-    }
-    
-    private func removeName(for uuid: UUID) {
-        var metadata = currentMetadata()
-        metadata.removeValue(forKey: uuid.uuidString)
-        updateMetadata(with: metadata)
     }
 }

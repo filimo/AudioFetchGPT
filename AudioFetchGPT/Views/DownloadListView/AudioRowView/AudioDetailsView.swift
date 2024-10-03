@@ -36,7 +36,7 @@ struct AudioDetailsView: View {
             .foregroundColor(.gray)
         }
         .onAppear {
-            editableName = downloadedAudios.getName(for: audio.id) ?? audio.fileName
+            editableName = audio.fileName
         }
         .sheet(isPresented: $isEditingName) {
             VStack {
@@ -49,7 +49,7 @@ struct AudioDetailsView: View {
                     .padding()
 
                 Button(action: {
-                    downloadedAudios.saveName(for: audio.id, name: editableName)
+                    downloadedAudios.updateFileName(for: audio.id, name: editableName)
                     isEditingName = false
                 }) {
                     Text("Готово")
