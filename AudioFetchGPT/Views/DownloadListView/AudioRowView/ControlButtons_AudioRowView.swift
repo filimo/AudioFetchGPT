@@ -20,6 +20,8 @@ extension AudioRowView {
                 Spacer()
                 
                 SeekButtonsView(audio: audio)
+                
+                Spacer()
             }
         }
     }
