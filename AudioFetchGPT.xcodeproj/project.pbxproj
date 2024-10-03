@@ -24,6 +24,7 @@
 		F02CB09C2CA097E7006F5441 /* AudioFetchGPTTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudioFetchGPTTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F071E9CF2C98303900423E5F /* AudioFetchGPT.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudioFetchGPT.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F071E9EE2C98A47E00423E5F /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
+		F0C5E6FA2CAE5F6B009F0441 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -31,6 +32,14 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+			);
+			target = F071E9CE2C98303900423E5F /* AudioFetchGPT */;
+		};
+		F0C5E6FB2CAE5F74009F0441 /* Exceptions for "Assets" folder in "AudioFetchGPT" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"downloaded-view.jpeg",
+				"main-view.jpeg",
 			);
 			target = F071E9CE2C98303900423E5F /* AudioFetchGPT */;
 		};
@@ -48,6 +57,14 @@
 				F071E9E92C98428C00423E5F /* Exceptions for "AudioFetchGPT" folder in "AudioFetchGPT" target */,
 			);
 			path = AudioFetchGPT;
+			sourceTree = "<group>";
+		};
+		F0C5E6ED2CAE5EB0009F0441 /* Assets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F0C5E6FB2CAE5F74009F0441 /* Exceptions for "Assets" folder in "AudioFetchGPT" target */,
+			);
+			path = Assets;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -73,6 +90,8 @@
 		F071E9C62C98303900423E5F = {
 			isa = PBXGroup;
 			children = (
+				F0C5E6FA2CAE5F6B009F0441 /* README.md */,
+				F0C5E6ED2CAE5EB0009F0441 /* Assets */,
 				F071E9EE2C98A47E00423E5F /* .gitignore */,
 				F071E9D12C98303900423E5F /* AudioFetchGPT */,
 				F02CB09D2CA097E7006F5441 /* AudioFetchGPTTests */,
@@ -129,6 +148,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				F071E9D12C98303900423E5F /* AudioFetchGPT */,
+				F0C5E6ED2CAE5EB0009F0441 /* Assets */,
 			);
 			name = AudioFetchGPT;
 			packageProductDependencies = (
