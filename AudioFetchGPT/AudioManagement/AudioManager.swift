@@ -15,44 +15,44 @@ class AudioManager: ObservableObject {
     @Published var currentAudioID: UUID?
     @Published private(set) var currentTime: Double = 0
     @Published var messageId: String = ""
-
+    
     private let playerManager = AudioPlayerManager()
     private let progressManager = AudioProgressManager()
     private let timerManager = AudioTimerManager()
     private var currentAudio: DownloadedAudio?
-
-    // Добавляем сильную ссылку на делегат
+    
     private var audioPlayerDelegate: AudioPlayerDelegate?
-
-    init() {
-        // Создаем экземпляр делегата и сохраняем сильную ссылку
+    
+    private var downloadedAudios: DownloadedAudios
+    
+    init(downloadedAudios: DownloadedAudios) {
+        self.downloadedAudios = downloadedAudios
         audioPlayerDelegate = AudioPlayerDelegate(audioManager: self)
         playerManager.delegate = audioPlayerDelegate
-
+        
         timerManager.updateAction = { [weak self] in
             self?.updateProgress()
         }
         
         setupRemoteCommandCenter()
         
-        // Подпи��итесь на уведомления о завершении воспроизведения
         NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: nil, queue: .main) { [weak self] _ in
             self?.handleAudioFinished()
         }
     }
-
+    
     var currentProgress: Double {
         get { currentAudioID.flatMap { progressManager.getProgress(for: $0) } ?? 0 }
         set { if let id = currentAudioID { progressManager.setProgress(newValue, for: id) } }
     }
-
+    
     func playAudio(for audio: DownloadedAudio) {
         guard playerManager.preparePlayer(for: audio.fileURL) else { return }
-
+        
         if isPlaying {
             pauseAudio()
         }
-
+        
         currentAudioID = audio.id
         currentAudio = audio
         seekAudio(for: audio, to: currentProgress)
@@ -60,27 +60,30 @@ class AudioManager: ObservableObject {
         playerManager.play()
         isPlaying = true
         updateNowPlayingProgress()
+        
+        // Обновление информации Now Playing с новым заголовком
+        setupNowPlaying(audio: audio)
     }
-
+    
     func pauseAudio() {
         playerManager.pause()
         isPlaying = false
         timerManager.stopTimer()
         updateNowPlayingProgress()
     }
-
+    
     func seekAudio(for audio: DownloadedAudio, to progress: Double) {
         let newTime = progress * playerManager.duration
         playerManager.seek(to: newTime)
         progressManager.setCurrentTime(newTime, for: audio.id)
     }
-
+    
     func seekBySeconds(for audio: DownloadedAudio, seconds: Double) {
         let newTime = max(0, min(playerManager.currentTime + seconds, playerManager.duration))
         playerManager.seek(to: newTime)
         currentProgress = newTime / playerManager.duration
     }
-
+    
     private func updateProgress() {
         guard let audioID = currentAudioID else { return }
         let progress = playerManager.currentTime / playerManager.duration
@@ -89,24 +92,24 @@ class AudioManager: ObservableObject {
         currentTime = playerManager.currentTime
         updateNowPlayingProgress()
     }
-
+    
     func handleAudioFinished() {
         pauseAudio()
+        playNextAudio()
         
-        // Обновите информацию Now Playing
         MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyElapsedPlaybackTime] = playerManager.duration
         MPNowPlayingInfoCenter.default().nowPlayingInfo?[MPNowPlayingInfoPropertyPlaybackRate] = 0.0
     }
-
+    
     func currentTimeForAudio(_ audioID: UUID) -> String {
         let time = audioID == currentAudioID ? currentTime : progressManager.getCurrentTime(for: audioID)
         return AudioTimeFormatter.formatTime(time)
     }
-
+    
     func progressForAudio(_ audioID: UUID) -> Double {
         return progressManager.getProgress(for: audioID)
     }
-
+    
     func seekAudio(for audioID: UUID, to progress: Double) {
         let newTime = progress * playerManager.duration
         if currentAudio?.id == audioID {
@@ -114,37 +117,11 @@ class AudioManager: ObservableObject {
         }
         progressManager.setCurrentTime(newTime, for: audioID)
         progressManager.setProgress(progress, for: audioID)
-    }    
-}
-
-extension AudioManager {
-    func setupNowPlaying(audio: DownloadedAudio, title: String) {
-        var nowPlayingInfo: [String: Any] = [
-            MPMediaItemPropertyTitle: title,
-            MPNowPlayingInfoPropertyPlaybackRate: playerManager.isPlaying ? 1.0 : 0.0,
-            MPMediaItemPropertyPlaybackDuration: playerManager.duration,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: playerManager.currentTime
-        ]
-        
-        if let artworkImage = UIImage(named: "ArtworkImage") {
-            let artwork = MPMediaItemArtwork(boundsSize: artworkImage.size) { size in
-                return artworkImage
-            }
-            nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
-        }
-        
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
-    func updateNowPlayingProgress() {
-        let nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo
-        var updatedInfo = nowPlayingInfo ?? [:]
-        updatedInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        updatedInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = updatedInfo
-    }
+    // MARK: - Remote Command Center
     
-    func setupRemoteCommandCenter() {
+    private func setupRemoteCommandCenter() {
         let commandCenter = MPRemoteCommandCenter.shared()
         
         // Настройка команд воспроизведения и паузы
@@ -170,36 +147,88 @@ extension AudioManager {
             return .success
         }
         
-        // Настройка команд перемотки вперед и назад с предпочтительными интервалами
-        commandCenter.skipForwardCommand.preferredIntervals = [5] // Перемотка вперед на 5 секунд
-        commandCenter.skipBackwardCommand.preferredIntervals = [5] // Перемотка назад на 5 секунд
-        
-        commandCenter.skipForwardCommand.addTarget { [weak self] event in
-            guard let self = self, let skipEvent = event as? MPSkipIntervalCommandEvent, let _ = self.currentAudio else { return .commandFailed }
-            let skipTime = skipEvent.interval
-            self.seekBySeconds(for: self.currentAudio!, seconds: skipTime)
-            return .success
-        }
-        
-        commandCenter.skipBackwardCommand.addTarget { [weak self] event in
-            guard let self = self, let skipEvent = event as? MPSkipIntervalCommandEvent, let _ = self.currentAudio else { return .commandFailed }
-            let skipTime = skipEvent.interval
-            self.seekBySeconds(for: self.currentAudio!, seconds: -skipTime)
-            return .success
-        }
-        
-        // Обработка команды перемотки к определенному времени
+        // Настройка команды изменения позиции воспроизведения
         commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
-            guard let self = self,
-                  let positionEvent = event as? MPChangePlaybackPositionCommandEvent,
-                  let _ = self.currentAudio else { return .commandFailed }
-            self.playerManager.seek(to: positionEvent.positionTime)
-            self.updateProgress()
+            guard let self = self, let changePositionEvent = event as? MPChangePlaybackPositionCommandEvent else {
+                return .commandFailed
+            }
+            let newTime = changePositionEvent.positionTime
+            if let currentAudio = self.currentAudio {
+                self.seekAudio(for: currentAudio, to: newTime / self.playerManager.duration)
+                self.updateNowPlayingProgress()
+                return .success
+            }
+            return .commandFailed
+        }
+        
+        // Включение команд следующего и предыдущего трека
+        commandCenter.nextTrackCommand.addTarget { [weak self] event in
+            guard let self = self else { return .commandFailed }
+            self.playNextAudio()
             return .success
         }
         
-        // Отключение ненужных команд, если они не используются
-        commandCenter.nextTrackCommand.isEnabled = false
-        commandCenter.previousTrackCommand.isEnabled = false
+        commandCenter.previousTrackCommand.addTarget { [weak self] event in
+            guard let self = self else { return .commandFailed }
+            self.playPreviousAudio()
+            return .success
+        }
+    }
+    
+    // MARK: - Play Next/Previous Audio
+    
+    func playNextAudio() {
+        guard let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudioID }),
+              currentIndex < downloadedAudios.items.count - 1 else {
+            pauseAudio()
+            return
+        }
+        let nextAudio = downloadedAudios.items[currentIndex + 1]
+        playAudio(for: nextAudio)
+        setupNowPlaying(audio: nextAudio)
+    }
+    
+    func playPreviousAudio() {
+        guard let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudioID }),
+              currentIndex > 0 else {
+            pauseAudio()
+            return
+        }
+        let previousAudio = downloadedAudios.items[currentIndex - 1]
+        playAudio(for: previousAudio)
+        setupNowPlaying(audio: previousAudio)
+    }
+    
+    // MARK: - Now Playing Info
+    
+    func setupNowPlaying(audio: DownloadedAudio) {
+        var nowPlayingInfo: [String: Any] = [
+            MPMediaItemPropertyTitle: audio.fileName,
+            MPNowPlayingInfoPropertyPlaybackRate: playerManager.isPlaying ? 1.0 : 0.0,
+            MPMediaItemPropertyPlaybackDuration: playerManager.duration,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: playerManager.currentTime
+        ]
+        
+        if let artworkImage = UIImage(named: "ArtworkImage") {
+            let artwork = MPMediaItemArtwork(boundsSize: artworkImage.size) { size in
+                return artworkImage
+            }
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
+        }
+        
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+    }
+    
+    func updateNowPlayingProgress() {
+        guard let currentAudio = currentAudio else { return }
+        
+        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = playerManager.duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackQueueIndex] = downloadedAudios.items.firstIndex(where: { $0.id == currentAudio.id })
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackQueueCount] = downloadedAudios.items.count
+        
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
 }

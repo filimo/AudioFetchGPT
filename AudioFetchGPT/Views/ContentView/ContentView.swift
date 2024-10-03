@@ -10,33 +10,34 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
-    @StateObject private var audioManager = AudioManager()
-    @State private var isSheetPresented = false
+    @EnvironmentObject var audioManager: AudioManager
     @StateObject private var webViewModel = WebViewModel()
-    @State private var showNotification = false // Новое состояние для уведомления
-    @State private var notificationMessage = "" // Сообщение уведомления
-    @State private var searchText = "" // Новое состояние для поискового запроса
-    @State private var searchForward = true // Новое состояние для направления поиска
-    @State private var isSearchVisible = false // Новое состояние для видимости поиска
+    @State private var isSheetPresented = false
+    @State private var showNotification = false
+    @State private var notificationMessage = ""
+    @State private var searchText = ""
+    @State private var searchForward = true
+    @State private var isSearchVisible = false
 
     let url = URL(string: "https://chatgpt.com")!
 
     var body: some View {
         ZStack {
             WebView(viewModel: webViewModel, url: url)
+                .environmentObject(downloadedAudios)
+                .environmentObject(audioManager)
 
             if isSearchVisible {
                 VStack {
-                    SearchBar(searchText: $searchText, searchForward: $searchForward, performSearch: {
+                    SearchBar(searchText: $searchText, searchForward: $searchForward) {
                         webViewModel.performSearch(text: searchText, forward: searchForward)
-                    })
+                    }
                     Spacer()
                 }
             }
 
             VStack {
                 Spacer()
-
                 ControlButtons(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
             }
 

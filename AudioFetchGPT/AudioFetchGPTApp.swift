@@ -9,10 +9,20 @@ import SwiftUI
 
 @main
 struct AudioFetchGPTApp: App {
+    @StateObject var downloadedAudios = DownloadedAudios()
+    @StateObject var audioManager: AudioManager
+    
+    init() {
+        let downloadedAudiosInstance = DownloadedAudios()
+        _downloadedAudios = StateObject(wrappedValue: downloadedAudiosInstance)
+        _audioManager = StateObject(wrappedValue: AudioManager(downloadedAudios: downloadedAudiosInstance))
+    }
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(DownloadedAudios())
+                .environmentObject(downloadedAudios)
+                .environmentObject(audioManager)
         }
     }
 }
