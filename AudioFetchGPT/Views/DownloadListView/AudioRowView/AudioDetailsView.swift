@@ -52,7 +52,7 @@ struct AudioDetailsView: View {
                     downloadedAudios.updateFileName(for: audio.id, name: editableName)
                     isEditingName = false
                 }) {
-                    Text("Готово")
+                    Text("Done")
                         .foregroundColor(.blue)
                         .padding()
                         .frame(maxWidth: .infinity)

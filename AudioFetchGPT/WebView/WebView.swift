@@ -25,7 +25,7 @@ struct WebView: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        // Пустая реализация, так как поиск теперь выполняется через WebViewModel
+        // Empty implementation since the search is now handled through WebViewModel
     }
 
     func makeCoordinator() -> ScriptMessageHandler {

@@ -6,17 +6,17 @@
 //
 import SwiftUI
 
-// Новое представление для панели поиска
+// New view for search bar
 struct SearchBar: View {
     @Binding var searchText: String
     @Binding var searchForward: Bool
-    var performSearch: () -> Void // Новое свойство
-    @Environment(\.colorScheme) var colorScheme // Добавляем это свойство
+    var performSearch: () -> Void // New property
+    @Environment(\.colorScheme) var colorScheme // Add this property
 
     var body: some View {
         HStack {
             ZStack(alignment: .trailing) {
-                TextField("Поиск", text: $searchText)
+                TextField("Search", text: $searchText)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
 
                 if !searchText.isEmpty {
@@ -45,8 +45,8 @@ struct SearchBar: View {
             }
         }
         .padding()
-        .background(colorScheme == .dark ? Color.black : Color.white) // Устанавливаем фон в зависимости от темы
-        .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Устанавливаем цвет текста в зависимости от темы
+        .background(colorScheme == .dark ? Color.black : Color.white) // Set background depending on theme
+        .foregroundColor(colorScheme == .dark ? Color.white : Color.black) // Set text color depending on theme
         .shadow(radius: 5)
     }
 }

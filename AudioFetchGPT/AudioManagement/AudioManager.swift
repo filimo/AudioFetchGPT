@@ -18,7 +18,7 @@ class AudioManager: ObservableObject {
     
     private let playerManager = AudioPlayerManager()
     private let progressManager = AudioProgressManager()
-    private let timerManager = AudioTimerManager()
+    private var timerManager = AudioTimerManager()
     private var currentAudio: DownloadedAudio?
     
     private var audioPlayerDelegate: AudioPlayerDelegate?
@@ -61,7 +61,7 @@ class AudioManager: ObservableObject {
         isPlaying = true
         updateNowPlayingProgress()
         
-        // Обновление информации Now Playing с новым заголовком
+        // Update Now Playing information with new title
         setupNowPlaying(audio: audio)
     }
     
@@ -124,7 +124,7 @@ class AudioManager: ObservableObject {
     private func setupRemoteCommandCenter() {
         let commandCenter = MPRemoteCommandCenter.shared()
         
-        // Настройка команд воспроизведения и паузы
+        // Setup play and pause commands
         commandCenter.playCommand.addTarget { [weak self] event in
             guard let self = self, let currentAudio = self.currentAudio else { return .commandFailed }
             self.playAudio(for: currentAudio)
@@ -147,7 +147,7 @@ class AudioManager: ObservableObject {
             return .success
         }
         
-        // Настройка команды изменения позиции воспроизведения
+        // Setup playback position change command
         commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
             guard let self = self, let changePositionEvent = event as? MPChangePlaybackPositionCommandEvent else {
                 return .commandFailed
@@ -161,7 +161,7 @@ class AudioManager: ObservableObject {
             return .commandFailed
         }
         
-        // Включение команд следующего и предыдущего трека
+        // Enable next and previous track commands
         commandCenter.nextTrackCommand.addTarget { [weak self] event in
             guard let self = self else { return .commandFailed }
             self.playNextAudio()

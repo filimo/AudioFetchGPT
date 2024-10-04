@@ -17,23 +17,23 @@ struct DownloadListView: View {
                 List {
                     ForEach(downloadedAudios.items) { audio in
                         AudioRowView(audio: audio)
-                            .id(audio.id) // Устанавливаем уникальный идентификатор
+                            .id(audio.id) // Set unique identifier
                             .onAppear {
-                                // Обновляем последний видимый идентификатор
+                                // Update last visible identifier
                                 lastScrolledID = audio.id
                             }
                             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                                 Button(role: .destructive) {
                                     deleteAudio(audio)
                                 } label: {
-                                    Label("Удалить", systemImage: "trash")
+                                    Label("Delete", systemImage: "trash")
                                 }
                             }
                     }
                 }
                 .navigationTitle("Downloaded Audios")
                 .onAppear {
-                    // Прокручиваем к последнему сохранённому положению
+                    // Scroll to the last saved position
                     if let lastID = lastScrolledID {
                         DispatchQueue.main.async {
                             proxy.scrollTo(lastID, anchor: .top)
@@ -41,7 +41,7 @@ struct DownloadListView: View {
                     }
                 }
                 .onDisappear {
-                    // Здесь можно сохранить lastScrolledID в постоянное хранилище, например, UserDefaults
+                    // Here we can save lastScrolledID to persistent storage, e.g., UserDefaults
                     if let lastID = lastScrolledID {
                         UserDefaults.standard.set(lastID.uuidString, forKey: "LastScrolledID")
                     }
@@ -49,7 +49,7 @@ struct DownloadListView: View {
             }
         }
         .onAppear {
-            // Загружаем сохранённый идентификатор при появлении
+            // Load saved identifier on appearance
             if let savedIDString = UserDefaults.standard.string(forKey: "LastScrolledID"),
                let savedID = UUID(uuidString: savedIDString)
             {
@@ -59,6 +59,10 @@ struct DownloadListView: View {
     }
 
     private func deleteAudio(_ audio: DownloadedAudio) {
-        downloadedAudios.deleteAudio(audio)
+        do {
+            try downloadedAudios.deleteAudio(audio)
+        } catch {
+            print("Failed to delete audio: \(error)")
+        }
     }
 }

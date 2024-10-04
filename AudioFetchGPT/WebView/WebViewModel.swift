@@ -30,7 +30,7 @@ final class WebViewModel: ObservableObject {
     func configureWebView(url: URL) {
         guard let webView = webView else { return }
 
-        // Загрузка JavaScript скрипта
+        // Loading JavaScript script
         let jsScript = try! String(contentsOf: Bundle.main.url(forResource: "script", withExtension: "js")!, encoding: .utf8)
 
         let userScript = WKUserScript(source: jsScript, injectionTime: .atDocumentStart, forMainFrameOnly: false)
@@ -49,11 +49,15 @@ final class WebViewModel: ObservableObject {
             let script = "window.find('\(text)', false, \(!forward), true)"
             webView.evaluateJavaScript(script) { _, error in
                 if let error = error {
-                    print("Ошибка поиска: \(error.localizedDescription)")
+                    print("Search error: \(error.localizedDescription)")
                 }
             }
         }
     }
+
+    // Asynchronous execution of JavaScript in WebView.
+    // This is necessary to perform searches without blocking the user interface.
+    // The closure is used to handle results or errors after the search is completed.
 
     func gotoMessage(conversationId: String, messageId: String) {
         guard let webView = webView else { return }
@@ -71,14 +75,14 @@ final class WebViewModel: ObservableObject {
     func gotoMessage(messageId: String) {
         let script = """
             document.querySelector('[data-message-id="\(messageId)"]').scrollIntoView({
-                behavior: 'smooth', // Плавная прокрутка
-                block: 'start'      // Прокрутка так, чтобы элемент был в начале видимой области
+                behavior: 'smooth', // Smooth scrolling
+                block: 'start'      // Scroll so that the element is at the beginning of the visible area
             });
         """
 
         webView?.evaluateJavaScript(script) { _, error in
             if let error = error {
-                print("Ошибка перехода: \(error.localizedDescription)")
+                print("Navigation error: \(error.localizedDescription)")
             }
         }
     }
@@ -123,14 +127,14 @@ final class WebViewModel: ObservableObject {
     func sayChatGPT(_ text: String) {
         guard let jsonData = try? JSONEncoder().encode(text),
               let jsonString = String(data: jsonData, encoding: .utf8) else {
-            print("Ошибка кодирования текста")
+            print("Text encoding error")
             return
         }
 
         let script = "document.querySelector('#prompt-textarea').innerText = \(jsonString);"
         webView?.evaluateJavaScript(script) { _, error in
             if let error = error {
-                print("Ошибка вставки текста: \(error.localizedDescription)")
+                print("Text insertion error: \(error.localizedDescription)")
             }
         }
     }

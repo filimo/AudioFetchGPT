@@ -47,7 +47,7 @@ class DownloadedAudios: ObservableObject {
                 saveDownloadedAudios()
             }
         } catch {
-            print("Не удалось удалить аудио: \(error)")
+            print("Failed to delete audio: \(error)")
         }
     }
     

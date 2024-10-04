@@ -9,5 +9,5 @@ import Foundation
 
 extension Notification.Name {
     static let audioDownloadCompleted = Notification.Name("audioDownloadCompleted")
-    // Здесь вы можете добавить другие пользовательские уведомления в будущем
+    // You can add other custom notifications here in the future
 }

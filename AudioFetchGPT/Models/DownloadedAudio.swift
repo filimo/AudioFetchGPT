@@ -10,8 +10,8 @@ struct DownloadedAudio: Identifiable, Codable {
     var id = UUID()
     var relativePath: String
     var fileName: String
-    var duration: TimeInterval? // Длительность аудио в секундах
-    var downloadDate: Date // Время скачивания
+    var duration: TimeInterval? // Audio duration in seconds
+    var downloadDate: Date // Download time
     let conversationId: String
     let messageId: String
     

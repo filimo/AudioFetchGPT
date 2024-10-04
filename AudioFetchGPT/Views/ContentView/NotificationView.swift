@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-// Новое представление для уведомления
+// New view for notification
 struct NotificationView: View {
     var message: String
 
