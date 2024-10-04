@@ -27,10 +27,10 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
                         
                     downloadAudio(from: audioData, conversationId: conversationId, messageId: messageId, name: name)
                 } else {
-                    print("Ошибка: Невозможно извлечь значения из объекта")
+                    print("Error: Unable to extract values from the object")
                 }
             } else {
-                print("Ошибка: message.body не является словарём")
+                print("Error: message.body is not a dictionary")
             }
         }
     }

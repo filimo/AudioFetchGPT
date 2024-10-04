@@ -52,7 +52,7 @@ struct ContentView: View {
         }
         .onAppear {
             downloadedAudios.loadDownloadedAudios()
-            // Подписываемся на уведомления о завершении загрузки
+            // Subscribe to notifications about download completion
             NotificationCenter.default.addObserver(forName: .audioDownloadCompleted, object: nil, queue: .main) { notification in
                 if let audioName = notification.object as? String {
                     showDownloadNotification(for: audioName)
@@ -64,7 +64,7 @@ struct ContentView: View {
         }
     }
 
-    // Функция для показа уведомления
+    // Function to show notification
     private func showDownloadNotification(for audioName: String) {
         notificationMessage = audioName
         showNotification = true

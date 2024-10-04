@@ -5,7 +5,7 @@
 
      window.fetch = function(input, init) {
          if (typeof input === 'string' && input.includes('/backend-api/synthesize')) {
-             // Парсим URL для извлечения параметров
+             // Parse URL to extract parameters
              const url = new URL(input, window.location.origin);
              let conversationId = url.searchParams.get('conversation_id') || '';
              let messageId = url.searchParams.get('message_id') || '';

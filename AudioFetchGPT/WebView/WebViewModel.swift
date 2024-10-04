@@ -87,7 +87,7 @@ final class WebViewModel: ObservableObject {
         guard let webView = webView,
               let messageId = targetMessageId else { return }
 
-        // JavaScript для ожидания появления элемента и прокрутки к нему
+        // JavaScript for waiting for the element to appear and scrolling to it
         let script = """
         function waitForElement(selector, callback) {
             const observer = new MutationObserver((mutations, obs) => {
@@ -101,7 +101,7 @@ final class WebViewModel: ObservableObject {
         }
 
         waitForElement('[data-message-id="\(messageId)"]', function(element) {
-            // Прерываем текущую прокрутку
+            // Interrupt current scrolling
             window.stop();
 
             setTimeout(() => {
@@ -112,11 +112,11 @@ final class WebViewModel: ObservableObject {
 
         webView.evaluateJavaScript(script) { _, error in
             if let error = error {
-                print("Ошибка выполнения скрипта: \(error.localizedDescription)")
+                print("Error executing script: \(error.localizedDescription)")
             }
         }
 
-        // Сбрасываем целевой `messageId`
+        // Reset target messageId
         targetMessageId = nil
     }
 

@@ -27,7 +27,6 @@
 		F071E9E92C98428C00423E5F /* Exceptions for "AudioFetchGPT" folder in "AudioFetchGPT" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				.cursorrules,
 				Info.plist,
 			);
 			target = F071E9CE2C98303900423E5F /* AudioFetchGPT */;
