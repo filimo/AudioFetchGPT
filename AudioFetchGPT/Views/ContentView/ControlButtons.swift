@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-// New view for control buttons
+// Новое представление для кнопок управления
 struct ControlButtons: View {
     @Binding var isSheetPresented: Bool
     var webViewModel: WebViewModel
@@ -17,7 +17,31 @@ struct ControlButtons: View {
         HStack {
             Spacer()
 
-            // Refresh button
+            // Кнопка "Предыдущий"
+            Button(action: {
+                webViewModel.scrollToPreviousReadAloudElement()
+            }) {
+                Image(systemName: "arrow.left.circle.fill")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(.blue)
+            }
+            .padding(.trailing, 20)
+            .accessibilityLabel("Прокрутить к предыдущему")
+
+            // Кнопка "Следующий"
+            Button(action: {
+                webViewModel.scrollToNextReadAloudElement()
+            }) {
+                Image(systemName: "arrow.right.circle.fill")
+                    .resizable()
+                    .frame(width: 30, height: 30)
+                    .foregroundColor(.blue)
+            }
+            .padding(.trailing, 20)
+            .accessibilityLabel("Прокрутить к следующему")
+
+            // Кнопка обновления
             Button(action: {
                 webViewModel.reload()
             }) {
@@ -28,7 +52,7 @@ struct ControlButtons: View {
             }
             .padding(.trailing, 20)
 
-            // Download button
+            // Кнопка загрузки
             Button(action: {
                 isSheetPresented = true
             }) {
@@ -39,7 +63,7 @@ struct ControlButtons: View {
             }
             .padding(.trailing, 20)
 
-            // Search button
+            // Кнопка поиска
             Button(action: {
                 isSearchVisible.toggle()
                 if !isSearchVisible {
@@ -53,7 +77,7 @@ struct ControlButtons: View {
             }
             .padding(.trailing, 20)
             
-            // New button for sending from clipboard
+            // Новая кнопка для отправки из буфера обмена
             Button(action: {
                 if let clipboardText = UIPasteboard.general.string {
                     webViewModel.sayChatGPT(clipboardText)
@@ -65,7 +89,7 @@ struct ControlButtons: View {
                     .foregroundColor(.purple)
             }
             .padding(.trailing, 20)
-            .accessibilityLabel("Send from clipboard")
+            .accessibilityLabel("Отправить из буфера обмена")
         }
         .padding(.bottom, 10)
         .padding(.trailing, 20)
