@@ -12,10 +12,9 @@ struct WebView: UIViewRepresentable {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
     
     @ObservedObject var viewModel: WebViewModel
-    let url: URL
     
     func makeUIView(context: Context) -> WKWebView {
-        viewModel.configureWebView(url: url)
+        viewModel.configureWebView()
 
         if let webView = viewModel.webView {
             webView.configuration.userContentController.add(context.coordinator, name: "audioHandler")

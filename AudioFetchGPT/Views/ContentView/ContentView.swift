@@ -19,11 +19,9 @@ struct ContentView: View {
     @State private var searchForward = true
     @State private var isSearchVisible = false
 
-    let url = URL(string: "https://chatgpt.com")!
-
     var body: some View {
         ZStack {
-            WebView(viewModel: webViewModel, url: url)
+            WebView(viewModel: webViewModel)
                 .environmentObject(downloadedAudios)
                 .environmentObject(audioManager)
 
