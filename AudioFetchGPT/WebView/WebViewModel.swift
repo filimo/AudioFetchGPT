@@ -9,7 +9,7 @@ import SwiftUI
 import WebKit
 
 final class WebViewModel: ObservableObject {
-    @Published var webView: WKWebView?
+    @Published var webView: WKWebView = WKWebView()
     
     @AppStorage("lastVisitedURL") var lastVisitedURL: String = "https://chatgpt.com"
     
@@ -18,20 +18,17 @@ final class WebViewModel: ObservableObject {
     private var currentReadAloudIndex: Int = 0
     
     init() {
-        self.webView = WKWebView()
-        webView?.isInspectable = true
+        webView.isInspectable = true
         setupNavigationDelegate()
     }
     
     private func setupNavigationDelegate() {
         let delegate = WebViewNavigationDelegate(viewModel: self)
         navigationDelegate = delegate
-        webView?.navigationDelegate = delegate
+        webView.navigationDelegate = delegate
     }
     
     func configureWebView() {
-        guard let webView = webView else { return }
-        
         do {
             // Загрузка JavaScript скрипта
             let jsScriptURL = Bundle.main.url(forResource: "script", withExtension: "js")
@@ -57,11 +54,11 @@ final class WebViewModel: ObservableObject {
     }
     
     func reload() {
-        webView?.reload()
+        webView.reload()
     }
     
     func performSearch(text: String, forward: Bool) {
-        guard !text.isEmpty, let webView = webView else { return }
+        guard !text.isEmpty else { return }
         
         let script = "window.find('\(text)', false, \(!forward), true)"
         webView.evaluateJavaScript(script) { _, error in
@@ -72,8 +69,6 @@ final class WebViewModel: ObservableObject {
     }
     
     func gotoMessage(conversationId: String, messageId: String) {
-        guard let webView = webView else { return }
-        
         if let url = URL(string: "https://chatgpt.com/c/\(conversationId)") {
             if webView.url?.absoluteString == url.absoluteString {
                 gotoMessage(messageId: messageId)
@@ -92,7 +87,7 @@ final class WebViewModel: ObservableObject {
             });
         """
         
-        webView?.evaluateJavaScript(script) { _, error in
+        webView.evaluateJavaScript(script) { _, error in
             if let error = error {
                 print("Navigation error: \(error.localizedDescription)")
             }
@@ -100,8 +95,7 @@ final class WebViewModel: ObservableObject {
     }
     
     func gotoMessage() {
-        guard let webView = webView,
-              let messageId = targetMessageId else { return }
+        guard let messageId = targetMessageId else { return }
         
         let script = """
         function waitForElement(selector, callback) {
@@ -141,7 +135,7 @@ final class WebViewModel: ObservableObject {
         }
         
         let script = "document.querySelector('#prompt-textarea').innerText = \(jsonString);"
-        webView?.evaluateJavaScript(script) { _, error in
+        webView.evaluateJavaScript(script) { _, error in
             if let error = error {
                 print("Text insertion error: \(error.localizedDescription)")
             }
@@ -160,7 +154,7 @@ final class WebViewModel: ObservableObject {
             })();
         """
         
-        webView?.evaluateJavaScript(script) { _, error in
+        webView.evaluateJavaScript(script) { _, error in
             if let error = error {
                 print("Scroll to element error: \(error.localizedDescription)")
             }
