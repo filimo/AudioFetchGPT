@@ -11,7 +11,7 @@ class DownloadedAudios: ObservableObject {
     @Published var items: [DownloadedAudio] = []
     @AppStorage(UserDefaultsKeys.savedMetaData) private var savedMetaData: String = "{}"
     
-    private struct UserDefaultsKeys {
+    private enum UserDefaultsKeys {
         static let downloadedAudios = "downloadedAudios"
         static let savedMetaData = "savedMetaData"
     }
@@ -25,11 +25,16 @@ class DownloadedAudios: ObservableObject {
     // MARK: - Public Methods
     
     func loadDownloadedAudios() {
-        guard let data = UserDefaults.standard.data(forKey: UserDefaultsKeys.downloadedAudios),
-              let savedAudios = try? JSONDecoder().decode([DownloadedAudio].self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: UserDefaultsKeys.downloadedAudios) else {
+            print("No data found for downloaded audios.")
             return
         }
-        items = filterExistingAudios(from: savedAudios)
+        do {
+            let savedAudios = try JSONDecoder().decode([DownloadedAudio].self, from: data)
+            items = filterExistingAudios(from: savedAudios)
+        } catch {
+            print("Error decoding downloaded audios: \(error)")
+        }
     }
     
     func addAudio(filePath: URL, fileName: String, duration: TimeInterval?, conversationId: String, messageId: String) {
@@ -56,6 +61,27 @@ class DownloadedAudios: ObservableObject {
             items[index].fileName = name
             saveDownloadedAudios()
         }
+    }
+    
+    func updateConversationName(conversationId: UUID, newName: String) {
+        for index in items.indices {
+            if UUID(uuidString: items[index].conversationId) == conversationId {
+                items[index].conversationName = newName
+            }
+        }
+        saveDownloadedAudios()
+    }
+
+    func getConversationName(by conversationId: UUID) -> String {
+        guard let name = items.first(where: { UUID(uuidString: $0.conversationId) == conversationId })?.conversationName else {
+            return conversationId.uuidString
+        }
+
+        return name.isEmpty ? conversationId.uuidString : name
+    }
+
+    func getConversationId(byName name: String) -> String {
+        return items.first { $0.conversationName == name }?.conversationId ?? "None ID"
     }
     
     // MARK: - Private Methods

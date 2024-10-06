@@ -10,59 +10,89 @@ import SwiftUI
 struct DownloadListView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
     @State private var lastScrolledID: UUID?
+    @State private var collapsedSections: Set<UUID> = []
+    @State private var editingConversationId: UUID?
+    @State private var newConversationName: String = ""
+
+    var groupedAudios: [UUID: [DownloadedAudio]] {
+        Dictionary(grouping: downloadedAudios.items, by: { UUID(uuidString: $0.conversationId)! })
+    }
 
     var body: some View {
         NavigationView {
             ScrollViewReader { proxy in
                 List {
-                    ForEach(downloadedAudios.items) { audio in
-                        AudioRowView(audio: audio)
-                            .id(audio.id) // Set unique identifier
-                            .onAppear {
-                                // Update last visible identifier
-                                lastScrolledID = audio.id
+                    ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
+                        Section(header: SectionHeader(conversationId: conversationId,
+                                                      conversationName: downloadedAudios.getConversationName(by: conversationId),
+                                                      onEdit: { startEditing(conversationId) },
+                                                      onToggle: { toggleSection(conversationId) },
+                                                      isCollapsed: collapsedSections.contains(conversationId)) // Pass collapsed state
+                        ) {
+                            if !collapsedSections.contains(conversationId) {
+                                AudioListView(audios: groupedAudios[conversationId] ?? [], onDelete: deleteAudio)
                             }
-                            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                                Button(role: .destructive) {
-                                    deleteAudio(audio)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
+                        }
                     }
                 }
+                .listStyle(InsetGroupedListStyle())
                 .navigationTitle("Downloaded Audios")
                 .onAppear {
-                    // Scroll to the last saved position
                     if let lastID = lastScrolledID {
                         DispatchQueue.main.async {
                             proxy.scrollTo(lastID, anchor: .top)
                         }
                     }
+
+                    if let savedIDString = UserDefaults.standard.string(forKey: "LastScrolledID"),
+                       let savedID = UUID(uuidString: savedIDString)
+                    {
+                        lastScrolledID = savedID
+                    }
                 }
                 .onDisappear {
-                    // Here we can save lastScrolledID to persistent storage, e.g., UserDefaults
                     if let lastID = lastScrolledID {
                         UserDefaults.standard.set(lastID.uuidString, forKey: "LastScrolledID")
                     }
                 }
-            }
-        }
-        .onAppear {
-            // Load saved identifier on appearance
-            if let savedIDString = UserDefaults.standard.string(forKey: "LastScrolledID"),
-               let savedID = UUID(uuidString: savedIDString)
-            {
-                lastScrolledID = savedID
+                .sheet(isPresented: Binding<Bool>(
+                    get: { editingConversationId != nil },
+                    set: { if !$0 { editingConversationId = nil } }
+                )) {
+                    if let conversationId = editingConversationId {
+                        // Extracted view for editing conversation name
+                        EditConversationView(conversationId: conversationId, newConversationName: $newConversationName, onCancel: {
+                            editingConversationId = nil
+                        }, onSave: {
+                            saveNewConversationName(conversationId: conversationId, newName: newConversationName)
+                            editingConversationId = nil
+                        })
+                    }
+                }
             }
         }
     }
 
-    private func deleteAudio(_ audio: DownloadedAudio) {
-        do {
-            try downloadedAudios.deleteAudio(audio)
-        } catch {
-            print("Failed to delete audio: \(error)")
+    private func toggleSection(_ conversationId: UUID) {
+        if collapsedSections.contains(conversationId) {
+            collapsedSections.remove(conversationId)
+        } else {
+            collapsedSections.insert(conversationId)
         }
     }
+
+    private func deleteAudio(_ audio: DownloadedAudio) {
+        downloadedAudios.deleteAudio(audio)
+    }
+
+    private func startEditing(_ conversationId: UUID) {
+        editingConversationId = conversationId
+        newConversationName = downloadedAudios.getConversationName(by: conversationId)
+    }
+
+    private func saveNewConversationName(conversationId: UUID, newName: String) {
+        downloadedAudios.updateConversationName(conversationId: conversationId, newName: newName)
+    }
 }
+
+
