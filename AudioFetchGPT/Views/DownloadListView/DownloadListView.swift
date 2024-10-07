@@ -9,6 +9,7 @@ import SwiftUI
 
 struct DownloadListView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
+    @EnvironmentObject var audioManager: AudioManager
     @State private var collapsedSections: Set<UUID> = []
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
@@ -19,21 +20,28 @@ struct DownloadListView: View {
 
     var body: some View {
         NavigationView {
-            List {
-                ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
-                    Section(header: SectionHeader(conversationId: conversationId,
-                                                  conversationName: downloadedAudios.getConversationName(by: conversationId),
-                                                  onEdit: { startEditing(conversationId) },
-                                                  onToggle: { toggleSection(conversationId) },
-                                                  isCollapsed: collapsedSections.contains(conversationId)) // Pass collapsed state
-                    ) {
-                        if !collapsedSections.contains(conversationId) {
-                            AudioListView(audios: groupedAudios[conversationId] ?? [], onDelete: deleteAudio)
+            ScrollViewReader { reader in
+                List {
+                    ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
+                        Section(header: SectionHeader(conversationId: conversationId,
+                                                      conversationName: downloadedAudios.getConversationName(by: conversationId),
+                                                      onEdit: { startEditing(conversationId) },
+                                                      onToggle: { toggleSection(conversationId) },
+                                                      isCollapsed: collapsedSections.contains(conversationId)) // Pass collapsed state
+                        ) {
+                            if !collapsedSections.contains(conversationId) {
+                                AudioListView(audios: groupedAudios[conversationId] ?? [], onDelete: deleteAudio)
+                            }
                         }
                     }
                 }
+                .listStyle(InsetGroupedListStyle())
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        reader.scrollTo(audioManager.currentAudioID)
+                    }
+                }
             }
-            .listStyle(InsetGroupedListStyle())
             .navigationTitle("Downloaded Audios")
             .sheet(isPresented: Binding<Bool>(
                 get: { editingConversationId != nil },

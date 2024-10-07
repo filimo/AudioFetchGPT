@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AudioDetailsView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
+    @EnvironmentObject var audioManager: AudioManager
     let audio: DownloadedAudio
     @State private var isEditingName: Bool = false
     @Binding var editableName: String
@@ -17,6 +18,7 @@ struct AudioDetailsView: View {
         VStack(alignment: .leading) {
             Text(editableName)
                 .font(.headline)
+                .underline(audioManager.currentAudioID == audio.id, color: .yellow)
                 .truncationMode(.tail)
                 .lineLimit(1)
                 .padding(.bottom, 5)
