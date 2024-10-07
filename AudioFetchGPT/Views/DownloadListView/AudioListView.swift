@@ -13,18 +13,17 @@ extension DownloadListView {
 
         var body: some View {
             ForEach(audios) { audio in
-                AudioRowView(audio: audio)
-                    .id(audio.id)
-                    .onAppear {
-                        // Handle onAppear logic if needed
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            onDelete(audio) // Call the delete function passed as a parameter
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+                VStack {
+                    AudioRowView(audio: audio)
+                        .id(audio.id)
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button(role: .destructive) {
+                                onDelete(audio) // Call the delete function passed as a parameter
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
-                    }
+                }
             }
         }
     }

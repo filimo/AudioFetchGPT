@@ -9,7 +9,6 @@ import SwiftUI
 
 struct DownloadListView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
-    @State private var lastScrolledID: UUID?
     @State private var collapsedSections: Set<UUID> = []
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
@@ -20,54 +19,34 @@ struct DownloadListView: View {
 
     var body: some View {
         NavigationView {
-            ScrollViewReader { proxy in
-                List {
-                    ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
-                        Section(header: SectionHeader(conversationId: conversationId,
-                                                      conversationName: downloadedAudios.getConversationName(by: conversationId),
-                                                      onEdit: { startEditing(conversationId) },
-                                                      onToggle: { toggleSection(conversationId) },
-                                                      isCollapsed: collapsedSections.contains(conversationId)) // Pass collapsed state
-                        ) {
-                            if !collapsedSections.contains(conversationId) {
-                                AudioListView(audios: groupedAudios[conversationId] ?? [], onDelete: deleteAudio)
-                            }
+            List {
+                ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
+                    Section(header: SectionHeader(conversationId: conversationId,
+                                                  conversationName: downloadedAudios.getConversationName(by: conversationId),
+                                                  onEdit: { startEditing(conversationId) },
+                                                  onToggle: { toggleSection(conversationId) },
+                                                  isCollapsed: collapsedSections.contains(conversationId)) // Pass collapsed state
+                    ) {
+                        if !collapsedSections.contains(conversationId) {
+                            AudioListView(audios: groupedAudios[conversationId] ?? [], onDelete: deleteAudio)
                         }
                     }
                 }
-                .listStyle(InsetGroupedListStyle())
-                .navigationTitle("Downloaded Audios")
-                .onAppear {
-                    if let lastID = lastScrolledID {
-                        DispatchQueue.main.async {
-                            proxy.scrollTo(lastID, anchor: .top)
-                        }
-                    }
-
-                    if let savedIDString = UserDefaults.standard.string(forKey: "LastScrolledID"),
-                       let savedID = UUID(uuidString: savedIDString)
-                    {
-                        lastScrolledID = savedID
-                    }
-                }
-                .onDisappear {
-                    if let lastID = lastScrolledID {
-                        UserDefaults.standard.set(lastID.uuidString, forKey: "LastScrolledID")
-                    }
-                }
-                .sheet(isPresented: Binding<Bool>(
-                    get: { editingConversationId != nil },
-                    set: { if !$0 { editingConversationId = nil } }
-                )) {
-                    if let conversationId = editingConversationId {
-                        // Extracted view for editing conversation name
-                        EditConversationView(conversationId: conversationId, newConversationName: $newConversationName, onCancel: {
-                            editingConversationId = nil
-                        }, onSave: {
-                            saveNewConversationName(conversationId: conversationId, newName: newConversationName)
-                            editingConversationId = nil
-                        })
-                    }
+            }
+            .listStyle(InsetGroupedListStyle())
+            .navigationTitle("Downloaded Audios")
+            .sheet(isPresented: Binding<Bool>(
+                get: { editingConversationId != nil },
+                set: { if !$0 { editingConversationId = nil } }
+            )) {
+                if let conversationId = editingConversationId {
+                    // Extracted view for editing conversation name
+                    EditConversationView(conversationId: conversationId, newConversationName: $newConversationName, onCancel: {
+                        editingConversationId = nil
+                    }, onSave: {
+                        saveNewConversationName(conversationId: conversationId, newName: newConversationName)
+                        editingConversationId = nil
+                    })
                 }
             }
         }
@@ -94,5 +73,3 @@ struct DownloadListView: View {
         downloadedAudios.updateConversationName(conversationId: conversationId, newName: newName)
     }
 }
-
-

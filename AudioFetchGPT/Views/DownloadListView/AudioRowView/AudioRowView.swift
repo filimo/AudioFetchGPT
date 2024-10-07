@@ -28,5 +28,6 @@ struct AudioRowView: View {
             ControlButtons(audio: audio)
         }
         .padding(.vertical, 10)
+        .background(audio.id == audioManager.currentAudioID ? Color.yellow.opacity(0.1) : Color.clear)
     }
 }

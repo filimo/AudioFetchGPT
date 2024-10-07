@@ -17,7 +17,7 @@ extension DownloadListView {
         var body: some View {
             HStack {
                 Text(conversationName)
-                    .lineLimit(1)
+                    .lineLimit(3)
                     .truncationMode(.middle)
                     .font(.headline)
                     .onTapGesture {
