@@ -9,6 +9,7 @@ import AVFoundation
 import Combine
 import MediaPlayer
 import NotificationCenter
+import SwiftUI
 
 class AudioManager: ObservableObject {
     @Published var isPlaying = false
@@ -125,19 +126,19 @@ class AudioManager: ObservableObject {
         let commandCenter = MPRemoteCommandCenter.shared()
         
         // Setup play and pause commands
-        commandCenter.playCommand.addTarget { [weak self] event in
+        commandCenter.playCommand.addTarget { [weak self] _ in
             guard let self = self, let currentAudio = self.currentAudio else { return .commandFailed }
             self.playAudio(for: currentAudio)
             return .success
         }
         
-        commandCenter.pauseCommand.addTarget { [weak self] event in
+        commandCenter.pauseCommand.addTarget { [weak self] _ in
             guard let self = self else { return .commandFailed }
             self.pauseAudio()
             return .success
         }
         
-        commandCenter.togglePlayPauseCommand.addTarget { [weak self] event in
+        commandCenter.togglePlayPauseCommand.addTarget { [weak self] _ in
             guard let self = self else { return .commandFailed }
             if self.isPlaying {
                 self.pauseAudio()
@@ -162,13 +163,13 @@ class AudioManager: ObservableObject {
         }
         
         // Enable next and previous track commands
-        commandCenter.nextTrackCommand.addTarget { [weak self] event in
+        commandCenter.nextTrackCommand.addTarget { [weak self] _ in
             guard let self = self else { return .commandFailed }
             self.playNextAudio()
             return .success
         }
         
-        commandCenter.previousTrackCommand.addTarget { [weak self] event in
+        commandCenter.previousTrackCommand.addTarget { [weak self] _ in
             guard let self = self else { return .commandFailed }
             self.playPreviousAudio()
             return .success
@@ -179,7 +180,8 @@ class AudioManager: ObservableObject {
     
     func playNextAudio() {
         guard let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudioID }),
-              currentIndex < downloadedAudios.items.count - 1 else {
+              currentIndex < downloadedAudios.items.count - 1
+        else {
             pauseAudio()
             return
         }
@@ -190,7 +192,8 @@ class AudioManager: ObservableObject {
     
     func playPreviousAudio() {
         guard let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudioID }),
-              currentIndex > 0 else {
+              currentIndex > 0
+        else {
             pauseAudio()
             return
         }
@@ -210,8 +213,8 @@ class AudioManager: ObservableObject {
         ]
         
         if let artworkImage = UIImage(named: "ArtworkImage") {
-            let artwork = MPMediaItemArtwork(boundsSize: artworkImage.size) { size in
-                return artworkImage
+            let artwork = MPMediaItemArtwork(boundsSize: artworkImage.size) { _ in
+                artworkImage
             }
             nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
         }
