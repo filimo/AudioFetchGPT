@@ -21,33 +21,6 @@ AudioFetchGPT is an iOS application designed to interact with ChatGPT, allowing 
 5. Search Functionality: Enables users to search within the ChatGPT interface.
 6. Background Audio: Supports background audio playback and control through the iOS audio session.
 
-## Main Components
-
-### WebView
-
-- `WebView.swift`: UIViewRepresentable struct that wraps a WKWebView for displaying ChatGPT.
-- `WebViewModel.swift`: Manages the WebView's configuration and JavaScript interactions.
-- `ScriptMessageHandler.swift`: Handles messages from JavaScript for audio download.
-
-### Audio Management
-
-- `AudioManager.swift`: Central manager for audio playback and control.
-- `AudioPlayerManager.swift`: Manages the AVAudioPlayer for actual audio playback.
-- `AudioProgressManager.swift`: Tracks and stores progress for each audio file.
-- `AudioTimerManager.swift`: Manages timers for updating audio progress.
-
-### Models
-
-- `DownloadedAudio.swift`: Represents a downloaded audio file.
-- `DownloadedAudios.swift`: Manages the collection of downloaded audio files.
-
-### Views
-
-- `ContentView.swift`: Main view of the application.
-- `DownloadListView.swift`: Displays the list of downloaded audio files.
-- `AudioRowView.swift`: Individual row view for each audio file in the list.
-- `AudioDetailsView.swift`: Detailed view for a single audio file.
-
 ## Key Functionalities
 
 1. **Audio Download**: The app injects a JavaScript script into the WebView to intercept audio synthesis requests. When an audio file is generated, it's captured and downloaded to the device.
@@ -58,7 +31,6 @@ AudioFetchGPT is an iOS application designed to interact with ChatGPT, allowing 
 
 4. **Web Interaction**: The app provides a custom interface for interacting with ChatGPT, including search functionality and the ability to navigate to specific messages.
 
-5. **State Management**: The app uses SwiftUI's state management features (@State, @ObservedObject, @EnvironmentObject) to maintain and update the UI based on user interactions and audio playback status.
 
 ## Input and Output
 
