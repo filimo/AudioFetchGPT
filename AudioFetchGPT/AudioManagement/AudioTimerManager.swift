@@ -14,7 +14,7 @@ class AudioTimerManager {
 
     func startTimer() {
         stopTimer()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.updateAction?()
         }
     }

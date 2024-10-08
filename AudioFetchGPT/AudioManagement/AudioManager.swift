@@ -52,22 +52,29 @@ class AudioManager: ObservableObject {
     }
     
     func playAudio(for audio: DownloadedAudio) {
-        guard playerManager.preparePlayer(for: audio.fileURL) else { return }
-        
-        if isPlaying {
-            pauseAudio()
+        // Проверяем, отличается ли выбрано новое аудио от текущего
+        if currentAudio?.id != audio.id {
+            // Подготавливаем новый аудио только если это новое аудио
+            guard playerManager.preparePlayer(for: audio.fileURL) else { return }
+            
+            currentAudioID = audio.id
+            currentAudio = audio
+            seekAudio(for: audio, to: currentProgress)
         }
-        
-        currentAudioID = audio.id
-        currentAudio = audio
-        seekAudio(for: audio, to: currentProgress)
-        timerManager.startTimer()
-        playerManager.play()
-        isPlaying = true
-        updateNowPlayingProgress()
-        
-        // Update Now Playing information with new title
-        setupNowPlaying(audio: audio)
+
+        if isPlaying && currentAudio?.id == audio.id {
+            pauseAudio()
+        } else {
+            timerManager.startTimer()
+            playerManager.play()
+            isPlaying = true
+            updateNowPlayingProgress()
+            
+            // Обновляем Now Playing информацию только при новом запуске
+            if currentAudio?.id == audio.id {
+                setupNowPlaying(audio: audio)
+            }
+        }
     }
     
     func pauseAudio() {
@@ -81,20 +88,26 @@ class AudioManager: ObservableObject {
         let newTime = progress * playerManager.duration
         playerManager.seek(to: newTime)
         progressManager.setCurrentTime(newTime, for: audio.id)
+        updateNowPlayingProgress()
     }
     
     func seekBySeconds(for audio: DownloadedAudio, seconds: Double) {
         let newTime = max(0, min(playerManager.currentTime + seconds, playerManager.duration))
         playerManager.seek(to: newTime)
         currentProgress = newTime / playerManager.duration
+        updateNowPlayingProgress()
     }
     
     private func updateProgress() {
         let progress = playerManager.currentTime / playerManager.duration
+        currentTime = playerManager.currentTime
         progressManager.setProgress(progress, for: currentAudioID)
         progressManager.setCurrentTime(playerManager.currentTime, for: currentAudioID)
-        currentTime = playerManager.currentTime
-        updateNowPlayingProgress()
+        
+        // Обновляем Now Playing только если воспроизведение активно
+        if isPlaying {
+            updateNowPlayingProgress()
+        }
     }
     
     func handleAudioFinished() {
@@ -153,16 +166,11 @@ class AudioManager: ObservableObject {
         
         // Setup playback position change command
         commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
-            guard let self = self, let changePositionEvent = event as? MPChangePlaybackPositionCommandEvent else {
+            guard let self = self, let positionEvent = event as? MPChangePlaybackPositionCommandEvent else {
                 return .commandFailed
             }
-            let newTime = changePositionEvent.positionTime
-            if let currentAudio = self.currentAudio {
-                self.seekAudio(for: currentAudio, to: newTime / self.playerManager.duration)
-                self.updateNowPlayingProgress()
-                return .success
-            }
-            return .commandFailed
+            self.seek(to: positionEvent.positionTime)
+            return .success
         }
         
         // Enable next and previous track commands
@@ -177,6 +185,13 @@ class AudioManager: ObservableObject {
             self.playPreviousAudio()
             return .success
         }
+    }
+    
+    func seek(to position: TimeInterval) {
+        playerManager.seek(to: position)
+        currentTime = position
+        progressManager.setCurrentTime(position, for: currentAudioID)
+        updateNowPlayingProgress()
     }
     
     // MARK: - Play Next/Previous Audio
@@ -210,9 +225,9 @@ class AudioManager: ObservableObject {
     func setupNowPlaying(audio: DownloadedAudio) {
         var nowPlayingInfo: [String: Any] = [
             MPMediaItemPropertyTitle: audio.fileName,
-            MPNowPlayingInfoPropertyPlaybackRate: playerManager.isPlaying ? 1.0 : 0.0,
+            MPNowPlayingInfoPropertyElapsedPlaybackTime: currentTime,
             MPMediaItemPropertyPlaybackDuration: playerManager.duration,
-            MPNowPlayingInfoPropertyElapsedPlaybackTime: playerManager.currentTime
+            MPNowPlayingInfoPropertyPlaybackRate: isPlaying ? 1.0 : 0.0
         ]
         
         if let artworkImage = UIImage(named: "ArtworkImage") {
