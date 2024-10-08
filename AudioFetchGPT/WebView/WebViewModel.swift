@@ -145,7 +145,7 @@ final class WebViewModel: ObservableObject {
     func scrollToReadAloudElement(at index: Int) {
         let script = """
             (function() {
-                var elements = document.querySelectorAll('[aria-label="Read aloud"]');
+                var elements = document.querySelectorAll('[data-testid="voice-play-turn-action-button"]');
                 if (elements.length > \(index)) {
                     elements[\(index)].scrollIntoView({ behavior: 'smooth', block: 'end' });
                 } else {
