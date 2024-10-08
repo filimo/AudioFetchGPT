@@ -134,7 +134,7 @@ final class WebViewModel: ObservableObject {
             return
         }
         
-        let script = "document.querySelector('#prompt-textarea').innerText = \(jsonString);"
+        let script = "document.querySelector('#prompt-textarea').innerText += \(jsonString);"
         webView.evaluateJavaScript(script) { _, error in
             if let error = error {
                 print("Text insertion error: \(error.localizedDescription)")

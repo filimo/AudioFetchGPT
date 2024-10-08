@@ -13,15 +13,14 @@ import SwiftUI
 
 class AudioManager: ObservableObject {
     @Published var isPlaying = false
-    @Published var currentAudioID: UUID?
+    @AppStorage("currentAudioID") var currentAudioIDString: String = ""
     @Published private(set) var currentTime: Double = 0
     @Published var messageId: String = ""
-    
+
     private let playerManager = AudioPlayerManager()
     private let progressManager = AudioProgressManager()
     private var timerManager = AudioTimerManager()
     private var currentAudio: DownloadedAudio?
-    
     private var audioPlayerDelegate: AudioPlayerDelegate?
     
     private var downloadedAudios: DownloadedAudios
@@ -43,8 +42,13 @@ class AudioManager: ObservableObject {
     }
     
     var currentProgress: Double {
-        get { currentAudioID.flatMap { progressManager.getProgress(for: $0) } ?? 0 }
-        set { if let id = currentAudioID { progressManager.setProgress(newValue, for: id) } }
+        get { progressManager.getProgress(for: currentAudioID) }
+        set { progressManager.setProgress(newValue, for: currentAudioID) }
+    }
+
+    var currentAudioID: UUID {
+        get { UUID(uuidString: currentAudioIDString) ?? UUID() }
+        set { currentAudioIDString = newValue.uuidString }
     }
     
     func playAudio(for audio: DownloadedAudio) {
@@ -86,10 +90,9 @@ class AudioManager: ObservableObject {
     }
     
     private func updateProgress() {
-        guard let audioID = currentAudioID else { return }
         let progress = playerManager.currentTime / playerManager.duration
-        progressManager.setProgress(progress, for: audioID)
-        progressManager.setCurrentTime(playerManager.currentTime, for: audioID)
+        progressManager.setProgress(progress, for: currentAudioID)
+        progressManager.setCurrentTime(playerManager.currentTime, for: currentAudioID)
         currentTime = playerManager.currentTime
         updateNowPlayingProgress()
     }
