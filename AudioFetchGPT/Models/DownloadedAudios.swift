@@ -10,7 +10,8 @@ import SwiftUI
 class DownloadedAudios: ObservableObject {
     @Published var items: [DownloadedAudio] = []
     @AppStorage(UserDefaultsKeys.savedMetaData) private var savedMetaData: String = "{}"
-    
+    @AppStorage("collapsedSections") private var collapsedSectionIDs: String = "[]"
+
     private enum UserDefaultsKeys {
         static let downloadedAudios = "downloadedAudios"
         static let savedMetaData = "savedMetaData"
@@ -117,6 +118,33 @@ class DownloadedAudios: ObservableObject {
         
         // Save the changes
         saveDownloadedAudios()
+    }
+
+    var collapsedSections: Set<UUID> {
+        get {
+            let data = Data(collapsedSectionIDs.utf8)
+            if let ids = try? JSONDecoder().decode([String].self, from: data) {
+                return Set(ids.compactMap { UUID(uuidString: $0) })
+            }
+            return []
+        }
+        set {
+            if let data = try? JSONEncoder().encode(newValue.map { $0.uuidString }),
+               let jsonString = String(data: data, encoding: .utf8)
+            {
+                collapsedSectionIDs = jsonString
+            }
+        }
+    }
+    
+    func toggleSection(_ conversationId: UUID) {
+        var sections = collapsedSections
+        if sections.contains(conversationId) {
+            sections.remove(conversationId)
+        } else {
+            sections.insert(conversationId)
+        }
+        collapsedSections = sections
     }
 
     // MARK: - Private Methods

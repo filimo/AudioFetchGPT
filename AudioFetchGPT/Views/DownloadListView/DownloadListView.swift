@@ -10,7 +10,7 @@ import SwiftUI
 struct DownloadListView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
     @EnvironmentObject var audioManager: AudioManager
-    @State private var collapsedSections: Set<UUID> = []
+    
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
     @State private var editMode: EditMode = .inactive // State for edit mode
@@ -27,10 +27,10 @@ struct DownloadListView: View {
                         Section(header: SectionHeader(conversationId: conversationId,
                                                       conversationName: downloadedAudios.getConversationName(by: conversationId),
                                                       onEdit: { startEditing(conversationId) },
-                                                      onToggle: { toggleSection(conversationId) },
-                                                      isCollapsed: collapsedSections.contains(conversationId))
+                                                      onToggle: { downloadedAudios.toggleSection(conversationId) },
+                                                      isCollapsed: downloadedAudios.collapsedSections.contains(conversationId))
                         ) {
-                            if !collapsedSections.contains(conversationId) {
+                            if !downloadedAudios.collapsedSections.contains(conversationId) {
                                 AudioListView(audios: groupedAudios[conversationId] ?? [],
                                              onDelete: deleteAudio,
                                              onMove: { indices, newOffset in
@@ -66,14 +66,6 @@ struct DownloadListView: View {
                     })
                 }
             }
-        }
-    }
-
-    private func toggleSection(_ conversationId: UUID) {
-        if collapsedSections.contains(conversationId) {
-            collapsedSections.remove(conversationId)
-        } else {
-            collapsedSections.insert(conversationId)
         }
     }
 
