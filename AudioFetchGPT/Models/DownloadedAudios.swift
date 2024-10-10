@@ -84,6 +84,41 @@ class DownloadedAudios: ObservableObject {
         return items.first { $0.conversationName == name }?.conversationId ?? "None ID"
     }
     
+    /// Method to move audio files within a specific conversation
+    func moveAudio(conversationId: UUID, indices: IndexSet, newOffset: Int) {
+        // Filter audio files belonging to the specified conversation
+        let conversationAudios = items.enumerated().filter { UUID(uuidString: $0.element.conversationId) == conversationId }
+        
+        // Extract the indices of the audio files to be moved relative to the conversation
+        let audioIndices = indices.compactMap { index in
+            items.firstIndex(where: { $0.id == conversationAudios[index].element.id })
+        }
+        
+        // Get the audio files to be moved
+        let movedAudios = audioIndices.map { items[$0] }
+        
+        // Remove the audio files from the main collection using a single change set to minimize UI updates
+        items.removeAll { movedAudios.contains($0) }
+        
+        // Calculate the new position to insert the moved audio files
+        let updatedConversationAudios = items.enumerated().filter { UUID(uuidString: $0.element.conversationId) == conversationId }
+        let boundedOffset = max(0, min(newOffset, updatedConversationAudios.count))
+        
+        // Determine the correct index for insertion in the main collection
+        let insertionIndex: Int
+        if boundedOffset < updatedConversationAudios.count {
+            insertionIndex = updatedConversationAudios[boundedOffset].offset
+        } else {
+            insertionIndex = items.endIndex
+        }
+        
+        // Insert the moved audio files back into the collection at the calculated index
+        items.insert(contentsOf: movedAudios, at: insertionIndex)
+        
+        // Save the changes
+        saveDownloadedAudios()
+    }
+
     // MARK: - Private Methods
     
     private func saveDownloadedAudios() {

@@ -13,6 +13,7 @@ struct DownloadListView: View {
     @State private var collapsedSections: Set<UUID> = []
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
+    @State private var editMode: EditMode = .inactive // State for edit mode
 
     var groupedAudios: [UUID: [DownloadedAudio]] {
         Dictionary(grouping: downloadedAudios.items, by: { UUID(uuidString: $0.conversationId)! })
@@ -27,15 +28,23 @@ struct DownloadListView: View {
                                                       conversationName: downloadedAudios.getConversationName(by: conversationId),
                                                       onEdit: { startEditing(conversationId) },
                                                       onToggle: { toggleSection(conversationId) },
-                                                      isCollapsed: collapsedSections.contains(conversationId)) // Pass collapsed state
+                                                      isCollapsed: collapsedSections.contains(conversationId))
                         ) {
                             if !collapsedSections.contains(conversationId) {
-                                AudioListView(audios: groupedAudios[conversationId] ?? [], onDelete: deleteAudio)
+                                AudioListView(audios: groupedAudios[conversationId] ?? [],
+                                             onDelete: deleteAudio,
+                                             onMove: { indices, newOffset in
+                                                 moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
+                                             })
                             }
                         }
                     }
                 }
                 .listStyle(InsetGroupedListStyle())
+                .environment(\.editMode, $editMode) // Bind edit mode
+                .toolbar {
+                    EditButton() // Button to toggle edit mode
+                }
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         reader.scrollTo(audioManager.currentAudioID)
@@ -79,5 +88,9 @@ struct DownloadListView: View {
 
     private func saveNewConversationName(conversationId: UUID, newName: String) {
         downloadedAudios.updateConversationName(conversationId: conversationId, newName: newName)
+    }
+
+    private func moveAudio(conversationId: UUID, indices: IndexSet, newOffset: Int) {
+        downloadedAudios.moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
     }
 }

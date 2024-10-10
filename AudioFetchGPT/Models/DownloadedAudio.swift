@@ -6,7 +6,7 @@
 //
 import Foundation
 
-struct DownloadedAudio: Identifiable, Codable {
+struct DownloadedAudio: Identifiable, Codable, Equatable { // Add Equatable conformance
     var id = UUID()
     var relativePath: String
     var fileName: String

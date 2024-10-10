@@ -3,13 +3,16 @@
 //  AudioFetchGPT
 //
 //  Created by Viktor Kushnerov on 6.10.24.
+//  Modified to support reordering by [Your Name] on [Date].
 //
+
 import SwiftUI
 
 extension DownloadListView {
     struct AudioListView: View {
         var audios: [DownloadedAudio]
         var onDelete: (DownloadedAudio) -> Void
+        var onMove: (IndexSet, Int) -> Void // Callback for moving items
 
         var body: some View {
             ForEach(audios) { audio in
@@ -23,6 +26,7 @@ extension DownloadListView {
                         }
                     }
             }
+            .onMove(perform: onMove) // Enable moving
         }
     }
 }
