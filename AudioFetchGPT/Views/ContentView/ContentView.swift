@@ -41,6 +41,9 @@ struct ContentView: View {
 
             if showNotification {
                 NotificationView(message: notificationMessage)
+                    .onTapGesture {
+                        showNotification = false
+                    }
             }
         }
         .sheet(isPresented: $isSheetPresented) {
@@ -66,7 +69,7 @@ struct ContentView: View {
     private func showDownloadNotification(for audioName: String) {
         notificationMessage = audioName
         showNotification = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
             showNotification = false
         }
     }

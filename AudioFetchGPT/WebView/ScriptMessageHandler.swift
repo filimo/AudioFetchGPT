@@ -7,6 +7,8 @@
 import AVFAudio
 import SwiftUI
 import WebKit
+import AudioToolbox // Импортируем для воспроизведения системных звуков
+import UIKit // Импортируем для использования вибрации
 
 class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
     @ObservedObject var downloadedAudios: DownloadedAudios
@@ -51,9 +53,19 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
                 let duration = audioPlayer.duration
                 
                 self.downloadedAudios.addAudio(filePath: filePath, fileName: name, duration: duration, conversationId: conversationId, messageId: messageId)
+                
+                self.playSignalSoundAndVibrate() // Play sound and vibrate after saving the file
             } catch {
                 print("Failed to save audio file: \(error)")
             }
         }.resume()
+    }
+    
+    private func playSignalSoundAndVibrate() {
+        // Play a system sound (e.g., mail sent sound)
+        AudioServicesPlaySystemSound(1013) //"Тон успеха"
+        
+        // Trigger device vibration
+        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
     }
 }
