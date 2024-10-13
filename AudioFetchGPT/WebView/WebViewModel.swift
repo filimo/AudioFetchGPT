@@ -9,7 +9,7 @@ import SwiftUI
 import WebKit
 
 final class WebViewModel: ObservableObject {
-    @Published var webView: WKWebView = WKWebView()
+    @Published var webView: WKWebView = .init()
     
     @AppStorage("lastVisitedURL") var lastVisitedURL: String = "https://chatgpt.com"
     
@@ -169,5 +169,41 @@ final class WebViewModel: ObservableObject {
     func scrollToPreviousReadAloudElement() {
         currentReadAloudIndex = max(0, currentReadAloudIndex - 1)
         scrollToReadAloudElement(at: currentReadAloudIndex)
+    }
+
+    func clickAllVoicePlayTurnActionButtons() {
+        let script = """
+            (function() {
+                document.querySelectorAll('[data-testid="voice-play-turn-action-button"]').forEach(el => {
+                    el.click();
+                });
+            })();
+        """
+        
+        webView.evaluateJavaScript(script) { _, error in
+            if let error = error {
+                print("Click all voice play turn action buttons error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @MainActor
+    func removeProcessedAudioItem(conversationId: String, messageId: String) async throws {
+        let script = """
+            (function() {
+                localStorage.removeItem('\(conversationId)_\(messageId)');
+            })();
+        """
+        
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            webView.evaluateJavaScript(script) { _, error in
+                if let error = error {
+                    print("Remove processed audio item error: \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume()
+                }
+            }
+        }
     }
 }

@@ -1,11 +1,11 @@
 (function() {
     console.log('Start handling /backend-api/synthesize');
 
-    var originalFetch = window.fetch;
-    var queue = [];
-    var processing = false;
+    const originalFetch = window.fetch;
+    const queue = [];
+    let processing = false;
 
-    // function for processing the next requests
+    // Function to process the queue
     function processQueue() {
         if (queue.length === 0 || processing) {
             return;
@@ -15,43 +15,84 @@
         const { input, init, resolve, reject } = queue.shift();
 
         originalFetch(input, init)
-            .then(response => {
-                response.clone().blob().then(blob => {
-                    const url = new URL(input, window.location.origin);
-                    let conversationId = url.searchParams.get('conversation_id') || '';
-                    let messageId = url.searchParams.get('message_id') || '';
-                    let name = document.querySelector(`[data-message-id="${messageId}"]`).innerText;
-
-                    var reader = new FileReader();
-                    reader.onloadend = function() {
-                        window.webkit.messageHandlers.audioHandler.postMessage({
-                            conversationId: conversationId,
-                            messageId: messageId,
-                            audioData: reader.result,
-                            name: name
-                        });
-                        resolve(response);
-                        processing = false;
-                        processQueue();
-                    };
-                    reader.readAsDataURL(blob);
-                }).catch(error => {
-                    console.error('Error reading blob:', error);
-                    reject(error);
-                    processing = false;
-                    processQueue();
-                });
-            })
-            .catch(error => {
-                console.error('Fetch error:', error);
-                reject(error);
-                processing = false;
-                processQueue();
-            });
+            .then(response => handleResponse(response, input, resolve, reject))
+            .catch(error => handleFetchError(error, reject));
     }
 
+    // Function to handle the response
+    function handleResponse(response, input, resolve, reject) {
+        response.clone().blob()
+            .then(blob => processBlob(blob, input, response, resolve, reject))
+            .catch(error => handleBlobError(error, reject));
+    }
+
+    // Function to process the blob
+    function processBlob(blob, input, response, resolve, reject) {
+        const url = new URL(input, window.location.origin);
+        const conversationId = url.searchParams.get('conversation_id') || '';
+        const messageId = url.searchParams.get('message_id') || '';
+        const name = document.querySelector(`[data-message-id="${messageId}"]`).innerText;
+
+        const key = `${conversationId}_${messageId}`;
+        if (localStorage.getItem(key)) {
+            console.log(`Combination ${key} already processed, skipping fetch.`);
+            resolve(response);
+            processing = false;
+            processQueue();
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onloadend = () => sendMessageToWebKit(reader.result, conversationId, messageId, name, resolve, response);
+        reader.readAsDataURL(blob);
+    }
+
+    // Function to send the message to WebKit
+    function sendMessageToWebKit(audioData, conversationId, messageId, name, resolve, response) {
+        window.webkit.messageHandlers.audioHandler.postMessage({
+            conversationId,
+            messageId,
+            audioData,
+            name
+        });
+
+        const key = `${conversationId}_${messageId}`;
+        localStorage.setItem(key, 'processed');
+
+        resolve(response);
+        processing = false;
+        processQueue();
+    }
+
+    // Function to handle blob errors
+    function handleBlobError(error, reject) {
+        console.error('Error reading blob:', error);
+        reject(error);
+        processing = false;
+        processQueue();
+    }
+
+    // Function to handle fetch errors
+    function handleFetchError(error, reject) {
+        console.error('Fetch error:', error);
+        reject(error);
+        processing = false;
+        processQueue();
+    }
+
+    // Override the fetch function
     window.fetch = function(input, init) {
         if (typeof input === 'string' && input.includes('/backend-api/synthesize')) {
+            const url = new URL(input, window.location.origin);
+            const conversationId = url.searchParams.get('conversation_id') || '';
+            const messageId = url.searchParams.get('message_id') || '';
+
+            const key = `${conversationId}_${messageId}`;
+            if (localStorage.getItem(key)) {
+                console.log(`Combination ${key} already processed, fetch aborted.`);
+                return Promise.resolve(new Response(null, { status: 409, statusText: 'Conflict: already processed' }));
+            }
+
             return new Promise((resolve, reject) => {
                 queue.push({ input, init, resolve, reject });
                 processQueue();

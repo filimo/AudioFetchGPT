@@ -48,7 +48,6 @@ struct ContentView: View {
         }
         .sheet(isPresented: $isSheetPresented) {
             DownloadListView()
-                .environmentObject(audioManager)
                 .environmentObject(webViewModel)
         }
         .onAppear {

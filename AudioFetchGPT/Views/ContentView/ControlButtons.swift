@@ -6,92 +6,137 @@
 //
 import SwiftUI
 
-// Новое представление для кнопок управления
 struct ControlButtons: View {
     @Binding var isSheetPresented: Bool
     var webViewModel: WebViewModel
     @Binding var isSearchVisible: Bool
     @Binding var searchText: String
+    @State private var showMenu: Bool = false // State for showing/hiding menu
 
     var body: some View {
-        HStack {
+        // Floating button
+        VStack {
             Spacer()
 
-            // Кнопка "Предыдущий"
-            Button(action: {
-                webViewModel.scrollToPreviousReadAloudElement()
-            }) {
-                Image(systemName: "arrow.left.circle.fill")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.blue)
-            }
-            .padding(.trailing, 20)
-            .accessibilityLabel("Прокрутить к предыдущему")
+            // Show all buttons with action descriptions if menu is open
+            if showMenu {
+                VStack(alignment: .trailing, spacing: 16) {
+                    // Previous button
+                    HStack {
+                        Text("Previous audio button")
+                        Button(action: {
+                            webViewModel.scrollToPreviousReadAloudElement()
+                        }) {
+                            Image(systemName: "arrow.left.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.blue)
+                        }
+                    }
 
-            // Кнопка "Следующий"
-            Button(action: {
-                webViewModel.scrollToNextReadAloudElement()
-            }) {
-                Image(systemName: "arrow.right.circle.fill")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.blue)
-            }
-            .padding(.trailing, 20)
-            .accessibilityLabel("Прокрутить к следующему")
+                    // Next button
+                    HStack {
+                        Text("Next audio button")
+                        Button(action: {
+                            webViewModel.scrollToNextReadAloudElement()
+                        }) {
+                            Image(systemName: "arrow.right.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.blue)
+                        }
+                    }
 
-            // Кнопка обновления
-            Button(action: {
-                webViewModel.reload()
-            }) {
-                Image(systemName: "arrow.clockwise.circle.fill")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.green)
-            }
-            .padding(.trailing, 20)
+                    // Reload button
+                    HStack {
+                        Text("Reload a page")
+                        Button(action: {
+                            webViewModel.reload()
+                        }) {
+                            Image(systemName: "arrow.clockwise.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.green)
+                        }
+                    }
 
-            // Кнопка загрузки
-            Button(action: {
-                isSheetPresented = true
-            }) {
-                Image(systemName: "arrow.down.circle.fill")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.blue)
-            }
-            .padding(.trailing, 20)
+                    // Play all voice actions button
+                    HStack {
+                        Text("Download All Voice Messages")
+                        Button(action: {
+                            webViewModel.clickAllVoicePlayTurnActionButtons()
+                        }) {
+                            Image(systemName: "arrow.down.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.yellow)
+                        }
+                    }
 
-            // Кнопка поиска
+                    // Download button
+                    HStack {
+                        Text("Show downloaded audios")
+                        Button(action: {
+                            isSheetPresented = true
+                        }) {
+                            Image(systemName: "music.note")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.blue)
+                        }
+                    }
+
+                    // Search button
+                    HStack {
+                        Text("Search")
+                        Button(action: {
+                            isSearchVisible.toggle()
+                            if !isSearchVisible {
+                                searchText = ""
+                            }
+                        }) {
+                            Image(systemName: isSearchVisible ? "magnifyingglass.circle.fill" : "magnifyingglass")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.orange)
+                        }
+                    }
+
+                    // Send from clipboard button
+                    HStack {
+                        Text("Send from Clipboard")
+                        Button(action: {
+                            if let clipboardText = UIPasteboard.general.string {
+                                webViewModel.sayChatGPT(clipboardText)
+                            }
+                        }) {
+                            Image(systemName: "paperplane.circle.fill")
+                                .resizable()
+                                .frame(width: 30, height: 30)
+                                .foregroundColor(.purple)
+                        }
+                    }
+                }
+                .transition(.move(edge: .trailing)) // Adding animation
+                .padding(.bottom, 60)
+                .padding(.horizontal, 40)
+                .padding(.top, 20)
+                .background(Color(.systemBackground).opacity(0.7))
+            }
+
+            // Floating button to show/hide menu
             Button(action: {
-                isSearchVisible.toggle()
-                if !isSearchVisible {
-                    searchText = ""
+                withAnimation {
+                    showMenu.toggle()
                 }
             }) {
-                Image(systemName: isSearchVisible ? "magnifyingglass.circle.fill" : "magnifyingglass")
+                Image(systemName: showMenu ? "xmark.circle.fill" : "plus.circle.fill")
                     .resizable()
                     .frame(width: 30, height: 30)
-                    .foregroundColor(.orange)
+                    .foregroundColor(.blue)
             }
-            .padding(.trailing, 20)
-            
-            // Новая кнопка для отправки из буфера обмена
-            Button(action: {
-                if let clipboardText = UIPasteboard.general.string {
-                    webViewModel.sayChatGPT(clipboardText)
-                }
-            }) {
-                Image(systemName: "paperplane.circle.fill")
-                    .resizable()
-                    .frame(width: 30, height: 30)
-                    .foregroundColor(.purple)
-            }
-            .padding(.trailing, 20)
-            .accessibilityLabel("Отправить из буфера обмена")
         }
-        .padding(.bottom, 10)
+        .padding(.bottom, 10) // Position the floating button at the bottom of the screen
         .padding(.trailing, 20)
     }
 }

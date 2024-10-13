@@ -9,11 +9,16 @@ import SwiftUI
 
 struct DownloadListView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
+    @EnvironmentObject var webViewModel: WebViewModel
     @EnvironmentObject var audioManager: AudioManager
-    
+    @EnvironmentObject var viewModel: WebViewModel
+
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
     @State private var editMode: EditMode = .inactive // State for edit mode
+
+    @State var showErrorAlert: Bool = false
+    @State var errorMessage: String = ""
 
     var groupedAudios: [UUID: [DownloadedAudio]] {
         Dictionary(grouping: downloadedAudios.items, by: { UUID(uuidString: $0.conversationId)! })
@@ -32,10 +37,10 @@ struct DownloadListView: View {
                         ) {
                             if !downloadedAudios.collapsedSections.contains(conversationId) {
                                 AudioListView(audios: groupedAudios[conversationId] ?? [],
-                                             onDelete: deleteAudio,
-                                             onMove: { indices, newOffset in
-                                                 moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
-                                             })
+                                              onDelete: deleteAudio,
+                                              onMove: { indices, newOffset in
+                                                  moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
+                                              })
                             }
                         }
                     }
@@ -66,11 +71,33 @@ struct DownloadListView: View {
                     })
                 }
             }
+            .alert(isPresented: $showErrorAlert) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(errorMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
         }
     }
 
     private func deleteAudio(_ audio: DownloadedAudio) {
-        downloadedAudios.deleteAudio(audio)
+        guard webViewModel.webView.url?.host() == "chatgpt.com" else {
+            errorMessage = "Failed to remove item: Host is not chatgpt.com"
+            showErrorAlert = true
+            return
+        }
+
+        Task {
+            do {
+                try await webViewModel.removeProcessedAudioItem(conversationId: audio.conversationId, messageId: audio.messageId)
+                downloadedAudios.deleteAudio(audio)
+            } catch {
+                print("Remove processed audio item error: \(error.localizedDescription)")
+                self.errorMessage = "Failed to remove item: \(error.localizedDescription)"
+                self.showErrorAlert = true
+            }
+        }
     }
 
     private func startEditing(_ conversationId: UUID) {
