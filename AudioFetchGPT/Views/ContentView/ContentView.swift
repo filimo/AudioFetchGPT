@@ -34,10 +34,7 @@ struct ContentView: View {
                 }
             }
 
-            VStack {
-                Spacer()
-                ControlButtons(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
-            }
+            ControlButtons(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
 
             if showNotification {
                 NotificationView(message: notificationMessage)
@@ -59,7 +56,7 @@ struct ContentView: View {
                 }
             }
         }
-        .onReceive(audioManager.$messageId) { messageId in
+        .onReceive(audioManager.$messageId) { _ in
             isSheetPresented = false
         }
     }

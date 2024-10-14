@@ -20,109 +20,132 @@ struct ControlButtons: View {
 
             // Show all buttons with action descriptions if menu is open
             if showMenu {
-                VStack(alignment: .trailing, spacing: 16) {
-                    // Previous button
-                    HStack {
-                        Text("Previous audio button")
-                        Button(action: {
-                            webViewModel.scrollToPreviousReadAloudElement()
-                        }) {
-                            Image(systemName: "arrow.left.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.blue)
-                        }
-                    }
+                HStack {
+                    Spacer()
 
-                    // Next button
-                    HStack {
-                        Text("Next audio button")
-                        Button(action: {
-                            webViewModel.scrollToNextReadAloudElement()
-                        }) {
-                            Image(systemName: "arrow.right.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.blue)
-                        }
-                    }
+                    VStack(alignment: .trailing, spacing: 20) {
+                        // Navigation buttons (Previous/Next) in one line without text
+                        HStack {
+                            Button(action: {
+                                webViewModel.scrollToPreviousReadAloudElement()
+                            }) {
+                                HStack {
+                                    Image(systemName: "arrow.left.circle.fill")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                            }
 
-                    // Reload button
-                    HStack {
-                        Text("Reload a page")
+                            Button(action: {
+                                webViewModel.scrollToNextReadAloudElement()
+                            }) {
+                                HStack {
+                                    Image(systemName: "arrow.right.circle.fill")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                            }
+                        }
+
+                        // Page management buttons (Reload/Search)
                         Button(action: {
                             webViewModel.reload()
                         }) {
-                            Image(systemName: "arrow.clockwise.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.green)
+                            HStack {
+                                Image(systemName: "arrow.clockwise.circle.fill")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.green)
+                                Text("Reload page")
+                                    .foregroundColor(.primary)
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                         }
-                    }
 
-                    // Play all voice actions button
-                    HStack {
-                        Text("Download All Voice Messages")
-                        Button(action: {
-                            webViewModel.clickAllVoicePlayTurnActionButtons()
-                        }) {
-                            Image(systemName: "arrow.down.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.yellow)
-                        }
-                    }
-
-                    // Download button
-                    HStack {
-                        Text("Show downloaded audios")
-                        Button(action: {
-                            isSheetPresented = true
-                        }) {
-                            Image(systemName: "music.note")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.blue)
-                        }
-                    }
-
-                    // Search button
-                    HStack {
-                        Text("Search")
                         Button(action: {
                             isSearchVisible.toggle()
                             if !isSearchVisible {
                                 searchText = ""
                             }
                         }) {
-                            Image(systemName: isSearchVisible ? "magnifyingglass.circle.fill" : "magnifyingglass")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.orange)
+                            HStack {
+                                Image(systemName: isSearchVisible ? "magnifyingglass.circle.fill" : "magnifyingglass")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.orange)
+                                Text(isSearchVisible ? "Hide search" : "Show search")
+                                    .foregroundColor(.primary)
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                         }
-                    }
 
-                    // Send from clipboard button
-                    HStack {
-                        Text("Send from Clipboard")
+                        // Clipboard button
                         Button(action: {
                             if let clipboardText = UIPasteboard.general.string {
                                 webViewModel.sayChatGPT(clipboardText)
                             }
                         }) {
-                            Image(systemName: "paperplane.circle.fill")
-                                .resizable()
-                                .frame(width: 30, height: 30)
-                                .foregroundColor(.purple)
+                            HStack {
+                                Image(systemName: "paperplane.circle.fill")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.purple)
+                                Text("Send from Clipboard")
+                                    .foregroundColor(.primary)
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                        }
+
+                        // Media-related buttons (Download/Show audios)
+                        Button(action: {
+                            webViewModel.clickAllVoicePlayTurnActionButtons()
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.down.circle.fill")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.yellow)
+                                Text("Download all voices")
+                                    .foregroundColor(.primary)
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                        }
+
+                        Button(action: {
+                            isSheetPresented = true
+                        }) {
+                            HStack {
+                                Image(systemName: "music.note")
+                                    .resizable()
+                                    .frame(width: 40, height: 40)
+                                    .foregroundColor(.blue)
+                                Text("Show downloaded audios")
+                                    .foregroundColor(.primary)
+                                    .font(.system(size: 16, weight: .bold))
+                            }
+                            .padding()
+                            .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                         }
                     }
                 }
                 .transition(.move(edge: .trailing)) // Adding animation
-                .padding(.bottom, 60)
-                .padding(.horizontal, 40)
-                .padding(.top, 20)
-                .background(Color(.systemBackground).opacity(0.7))
             }
+
+            Spacer().frame(height: 70)
 
             // Floating button to show/hide menu
             Button(action: {
