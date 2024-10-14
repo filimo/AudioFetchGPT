@@ -12,6 +12,7 @@ struct ControlButtons: View {
     @Binding var isSearchVisible: Bool
     @Binding var searchText: String
     @State private var showMenu: Bool = false // State for showing/hiding menu
+    @State private var showDownloadConfirmation: Bool = false 
 
     var body: some View {
         // Floating button
@@ -110,7 +111,7 @@ struct ControlButtons: View {
 
                         // Media-related buttons (Download/Show audios)
                         Button(action: {
-                            webViewModel.clickAllVoicePlayTurnActionButtons()
+                            showDownloadConfirmation = true
                         }) {
                             HStack {
                                 Image(systemName: "arrow.down.circle.fill")
@@ -124,6 +125,17 @@ struct ControlButtons: View {
                             .padding()
                             .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                         }
+                        .alert(isPresented: $showDownloadConfirmation) {
+                            Alert(
+                                title: Text("Confirm Download"),
+                                message: Text("Are you sure you want to download all voice messages? This may take some time."),
+                                primaryButton: .default(Text("Yes"), action: {
+                                    webViewModel.clickAllVoicePlayTurnActionButtons()
+                                }),
+                                secondaryButton: .cancel()
+                            )
+                        }
+
 
                         Button(action: {
                             isSheetPresented = true
