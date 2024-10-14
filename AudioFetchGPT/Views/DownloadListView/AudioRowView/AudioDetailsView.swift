@@ -11,20 +11,48 @@ struct AudioDetailsView: View {
     @EnvironmentObject var downloadedAudios: DownloadedAudios
     @EnvironmentObject var audioManager: AudioManager
     let audio: DownloadedAudio
-    @State private var isEditingName: Bool = false
     @Binding var editableName: String
+    @State private var isEditingName: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(editableName)
-                .font(.headline)
-                .underline(audioManager.currentAudioID == audio.id, color: .yellow)
-                .truncationMode(.tail)
-                .lineLimit(1)
-                .padding(.bottom, 5)
-                .onTapGesture {
-                    isEditingName = true
+            if isEditingName {
+                ZStack(alignment: .bottomTrailing) {
+                    TextEditor(text: $editableName)
+                        .frame(height: 400)
+                        .padding()
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 10)
+                                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                        )
+                        .padding()
+
+                    Button(action: {
+                        downloadedAudios.updateFileName(for: audio.id, name: editableName)
+                        isEditingName = false
+                    }) {
+                        Text("OK")
+                            .foregroundColor(.white)
+                            .padding(10)
+                            .background(Color.blue)
+                            .cornerRadius(8)
+                            .shadow(radius: 5)
+                    }
+                    .padding([.trailing, .bottom], 15)
                 }
+                .padding(.bottom, 5)
+
+            } else {
+                Text(editableName)
+                    .font(.headline)
+                    .underline(audioManager.currentAudioID == audio.id, color: .yellow)
+                    .truncationMode(.tail)
+                    .lineLimit(1)
+                    .padding(.bottom, 5)
+                    .onTapGesture {
+                        isEditingName = true
+                    }
+            }
 
             HStack {
                 Text("\(AudioTimeFormatter.formatDate(audio.downloadDate))")
@@ -39,31 +67,6 @@ struct AudioDetailsView: View {
         }
         .onAppear {
             editableName = audio.fileName
-        }
-        .sheet(isPresented: $isEditingName) {
-            VStack {
-                TextEditor(text: $editableName)
-                    .padding()
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
-                    )
-                    .padding()
-
-                Button(action: {
-                    downloadedAudios.updateFileName(for: audio.id, name: editableName)
-                    isEditingName = false
-                }) {
-                    Text("Done")
-                        .foregroundColor(.blue)
-                        .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.gray.opacity(0.2))
-                        .cornerRadius(8)
-                }
-                .padding([.horizontal, .bottom])
-            }
-            .padding()
         }
     }
 }
