@@ -5,7 +5,6 @@
 //  Created by Viktor Kushnerov on 18.09.24.
 //
 
-
 import AVFoundation
 
 class AudioPlayerManager {
@@ -15,6 +14,8 @@ class AudioPlayerManager {
     var isPlaying: Bool {
         return audioPlayer?.isPlaying ?? false
     }
+
+    @Published var playbackRate: Float = 1.0 // Current playback rate
 
     func preparePlayer(for url: URL) -> Bool {
         guard FileManager.default.fileExists(atPath: url.path) else {
@@ -28,6 +29,7 @@ class AudioPlayerManager {
 
             audioPlayer = try AVAudioPlayer(contentsOf: url)
             audioPlayer?.delegate = delegate
+            audioPlayer?.enableRate = true // Enable rate adjustment
             return true
         } catch {
             print("Failed to prepare audio player: \(error)")
@@ -53,5 +55,10 @@ class AudioPlayerManager {
 
     var duration: TimeInterval {
         audioPlayer?.duration ?? 0
+    }
+
+    func setPlaybackRate(_ rate: Float) {
+        playbackRate = rate
+        audioPlayer?.rate = rate
     }
 }

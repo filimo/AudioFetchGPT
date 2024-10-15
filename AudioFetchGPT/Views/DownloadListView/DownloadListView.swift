@@ -15,7 +15,6 @@ struct DownloadListView: View {
 
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
-    @State private var editMode: EditMode = .inactive // State for edit mode
 
     @State var showErrorAlert: Bool = false
     @State var errorMessage: String = ""
@@ -26,57 +25,88 @@ struct DownloadListView: View {
 
     var body: some View {
         NavigationView {
-            ScrollViewReader { reader in
-                List {
-                    ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
-                        Section(header: SectionHeader(conversationId: conversationId,
-                                                      conversationName: downloadedAudios.getConversationName(by: conversationId),
-                                                      onEdit: { startEditing(conversationId) },
-                                                      onToggle: { downloadedAudios.toggleSection(conversationId) },
-                                                      isCollapsed: downloadedAudios.collapsedSections.contains(conversationId))
-                        ) {
-                            if !downloadedAudios.collapsedSections.contains(conversationId) {
-                                AudioListView(audios: groupedAudios[conversationId] ?? [],
-                                              onDelete: deleteAudio,
-                                              onMove: { indices, newOffset in
-                                                  moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
-                                              })
+            VStack {
+                HStack {
+                    Text("Speed: \(audioManager.playbackRate, specifier: "%.1f")x") // Display current playback rate
+
+                    // Кнопка для уменьшения скорости воспроизведения
+                    Button(action: {
+                        if audioManager.playbackRate > 0.5 {
+                            audioManager.setPlaybackRate(audioManager.playbackRate - 0.1)
+                        }
+                    }) {
+                        Image(systemName: "minus.circle")
+                            .padding(.trailing, 5)
+                    }
+
+                    // Слайдер для регулировки скорости
+                    Slider(value: Binding(
+                        get: { audioManager.playbackRate },
+                        set: { newValue in
+                            audioManager.setPlaybackRate(newValue)
+                        }
+                    ), in: 0.5 ... 2.0, step: 0.1) // Slider for selecting playback rate
+
+                    // Кнопка для увеличения скорости воспроизведения
+                    Button(action: {
+                        if audioManager.playbackRate < 2.0 {
+                            audioManager.setPlaybackRate(audioManager.playbackRate + 0.1)
+                        }
+                    }) {
+                        Image(systemName: "plus.circle")
+                            .padding(.leading, 5)
+                    }
+                }
+                .padding(.horizontal, 15)
+
+                ScrollViewReader { reader in
+                    List {
+                        ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
+                            Section(header: SectionHeader(conversationId: conversationId,
+                                                          conversationName: downloadedAudios.getConversationName(by: conversationId),
+                                                          onEdit: { startEditing(conversationId) },
+                                                          onToggle: { downloadedAudios.toggleSection(conversationId) },
+                                                          isCollapsed: downloadedAudios.collapsedSections.contains(conversationId))
+                            ) {
+                                if !downloadedAudios.collapsedSections.contains(conversationId) {
+                                    AudioListView(audios: groupedAudios[conversationId] ?? [],
+                                                  onDelete: deleteAudio,
+                                                  onMove: { indices, newOffset in
+                                                      moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
+                                                  })
+                                }
                             }
                         }
                     }
-                }
-                .listStyle(InsetGroupedListStyle())
-                .environment(\.editMode, $editMode) // Bind edit mode
-                .toolbar {
-                    EditButton() // Button to toggle edit mode
-                }
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                        reader.scrollTo(audioManager.currentAudioID)
+                    .listStyle(InsetGroupedListStyle())
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            reader.scrollTo(audioManager.currentAudioID)
+                        }
                     }
                 }
-            }
-            .navigationTitle("Downloaded Audios")
-            .sheet(isPresented: Binding<Bool>(
-                get: { editingConversationId != nil },
-                set: { if !$0 { editingConversationId = nil } }
-            )) {
-                if let conversationId = editingConversationId {
-                    // Extracted view for editing conversation name
-                    EditConversationView(conversationId: conversationId, newConversationName: $newConversationName, onCancel: {
-                        editingConversationId = nil
-                    }, onSave: {
-                        saveNewConversationName(conversationId: conversationId, newName: newConversationName)
-                        editingConversationId = nil
-                    })
+                .navigationTitle("Downloaded Audios")
+                .sheet(isPresented: Binding<Bool>(
+                    get: { editingConversationId != nil },
+                    set: { if !$0 { editingConversationId = nil } }
+                )) {
+                    if let conversationId = editingConversationId {
+                        // Extracted view for editing conversation name
+                        EditConversationView(conversationId: conversationId, newConversationName: $newConversationName, onCancel: {
+                            editingConversationId = nil
+                        }, onSave: {
+                            saveNewConversationName(conversationId: conversationId, newName: newConversationName)
+                            editingConversationId = nil
+                        })
+                    }
                 }
-            }
-            .alert(isPresented: $showErrorAlert) {
-                Alert(
-                    title: Text("Error"),
-                    message: Text(errorMessage),
-                    dismissButton: .default(Text("OK"))
-                )
+                .alert(isPresented: $showErrorAlert) {
+                    Alert(
+                        title: Text("Error"),
+                        message: Text(errorMessage),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
             }
         }
     }
