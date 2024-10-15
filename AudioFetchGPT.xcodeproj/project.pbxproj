@@ -35,7 +35,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				"downloaded-view.jpeg",
-				"main-view.jpeg",
 				"texteditor-view.jpeg",
 			);
 			target = F071E9CE2C98303900423E5F /* AudioFetchGPT */;
