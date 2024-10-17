@@ -1,5 +1,4 @@
 //
-//  AudioFetchGPTTests.swift
 //  AudioFetchGPTTests
 //
 //  Created by Viktor Kushnerov on 22.09.24.

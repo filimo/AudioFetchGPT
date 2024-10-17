@@ -1,5 +1,4 @@
 //
-//  AudioFetchGPTApp.swift
 //  AudioFetchGPT
 //
 //  Created by Viktor Kushnerov on 16.09.24.
@@ -9,18 +8,18 @@ import SwiftUI
 
 @main
 struct AudioFetchGPTApp: App {
-    @StateObject var downloadedAudios = DownloadedAudios()
-    @StateObject var audioManager: AudioManager
+    @StateObject var downloadedAudios = DownloadedAudioStore()
+    @StateObject var audioManager: PlaybackManager
     
     init() {
-        let downloadedAudiosInstance = DownloadedAudios()
+        let downloadedAudiosInstance = DownloadedAudioStore()
         _downloadedAudios = StateObject(wrappedValue: downloadedAudiosInstance)
-        _audioManager = StateObject(wrappedValue: AudioManager(downloadedAudios: downloadedAudiosInstance))
+        _audioManager = StateObject(wrappedValue: PlaybackManager(downloadedAudios: downloadedAudiosInstance))
     }
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainContentView()
                 .environmentObject(downloadedAudios)
                 .environmentObject(audioManager)
         }
