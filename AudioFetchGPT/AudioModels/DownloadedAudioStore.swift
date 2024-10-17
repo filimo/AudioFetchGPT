@@ -41,7 +41,7 @@ class DownloadedAudioStore: ObservableObject {
         let newAudio = DownloadedAudio(url: filePath, fileName: fileName, duration: duration, conversationId: conversationId, messageId: messageId)
         items.append(newAudio)
         saveDownloadedAudios()
-        notifyDownloadCompleted(fileName: fileName)
+        notifyDownloadCompleted(audio: newAudio)
     }
     
     func deleteAudio(_ audio: DownloadedAudio) {
@@ -160,7 +160,7 @@ class DownloadedAudioStore: ObservableObject {
         audios.filter { FileManager.default.fileExists(atPath: $0.fileURL.path) }
     }
     
-    private func notifyDownloadCompleted(fileName: String) {
-        NotificationCenter.default.post(name: .audioDownloadCompleted, object: fileName)
+    private func notifyDownloadCompleted(audio: DownloadedAudio) {
+        NotificationCenter.default.post(name: .audioDownloadCompleted, object: audio)
     }
 }

@@ -12,8 +12,7 @@ struct MainContentView: View {
     @EnvironmentObject var audioManager: PlaybackManager
     @StateObject private var webViewModel = ConversationWebViewModel()
     @State private var isSheetPresented = false
-    @State private var showNotification = false
-    @State private var notificationMessage = ""
+    @State private var notificationAudio: DownloadedAudio? = nil
     @State private var searchText = ""
     @State private var searchForward = true
     @State private var isSearchVisible = false
@@ -35,10 +34,10 @@ struct MainContentView: View {
 
             ControlButtonsView(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
 
-            if showNotification {
-                NotificationBannerView(message: notificationMessage)
+            if let audio = notificationAudio {
+                NotificationBannerView(audio: audio)
                     .onTapGesture {
-                        showNotification = false
+                        notificationAudio = nil
                     }
             }
         }
@@ -50,8 +49,8 @@ struct MainContentView: View {
             downloadedAudios.loadDownloadedAudios()
             // Subscribe to notifications about download completion
             NotificationCenter.default.addObserver(forName: .audioDownloadCompleted, object: nil, queue: .main) { notification in
-                if let audioName = notification.object as? String {
-                    showDownloadNotification(for: audioName)
+                if let audio = notification.object as? DownloadedAudio {
+                    showDownloadNotification(for: audio)
                 }
             }
         }
@@ -61,12 +60,8 @@ struct MainContentView: View {
     }
 
     // Function to show notification
-    private func showDownloadNotification(for audioName: String) {
-        notificationMessage = audioName
-        showNotification = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
-            showNotification = false
-        }
+    private func showDownloadNotification(for audio: DownloadedAudio?) {
+        notificationAudio = audio
     }
 }
 

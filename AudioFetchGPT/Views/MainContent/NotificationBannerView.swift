@@ -7,22 +7,44 @@ import SwiftUI
 
 // New view for notification
 struct NotificationBannerView: View {
-    var message: String
+    var audio: DownloadedAudio
+    @EnvironmentObject var audioManager: PlaybackManager
+    @EnvironmentObject var downloadedAudios: DownloadedAudioStore
 
     var body: some View {
         VStack {
-            Spacer()
-            Text(message)
-                .lineLimit(20)
+            ScrollView {
+                VStack {
+                    Spacer()
+                    Text(audio.fileName)
+                        .padding()
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .transition(.scale)
+                }
+            }
+            .frame(maxHeight: 350)
+            .padding()
+
+            Button(action: {
+                if audioManager.isPlaying, audioManager.currentAudioID == audio.id {
+                    audioManager.pauseAudio()
+                } else {
+                    audioManager.playAudio(for: audio)
+                    audioManager.setupNowPlaying(audio: audio)
+                }
+            }) {
+                HStack {
+                    Image(systemName: (audioManager.isPlaying && audioManager.currentAudioID == audio.id) ? "pause.circle.fill" : "play.circle.fill")
+                        .resizable()
+                        .frame(width: 40, height: 40)
+                }
                 .padding()
-                .background(Color.green)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                .transition(.scale)
-            Spacer()
+                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+            }
+            .padding()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.5))
-        .edgesIgnoringSafeArea(.all)
+        .padding()
     }
 }
