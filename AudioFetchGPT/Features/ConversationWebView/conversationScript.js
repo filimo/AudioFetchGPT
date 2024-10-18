@@ -33,15 +33,6 @@
         const messageId = url.searchParams.get('message_id') || '';
         const name = document.querySelector(`[data-message-id="${messageId}"]`).innerText;
 
-        const key = `${conversationId}_${messageId}`;
-        if (localStorage.getItem(key)) {
-            console.log(`Combination ${key} already processed, skipping fetch.`);
-            resolve(response);
-            processing = false;
-            processQueue();
-            return;
-        }
-
         const reader = new FileReader();
         reader.onloadend = () => sendMessageToWebKit(reader.result, conversationId, messageId, name, resolve, response);
         reader.readAsDataURL(blob);
@@ -55,9 +46,6 @@
             audioData,
             name
         });
-
-        const key = `${conversationId}_${messageId}`;
-        localStorage.setItem(key, 'processed');
 
         resolve(response);
         processing = false;
@@ -87,8 +75,7 @@
             const conversationId = url.searchParams.get('conversation_id') || '';
             const messageId = url.searchParams.get('message_id') || '';
 
-            const key = `${conversationId}_${messageId}`;
-            if (localStorage.getItem(key)) {
+            if (window.__downloadedMessageIDs && window.__downloadedMessageIDs.includes(messageId)) {
                 console.log(`Combination ${key} already processed, fetch aborted.`);
                 return Promise.resolve(new Response(null, { status: 409, statusText: 'Conflict: already processed' }));
             }

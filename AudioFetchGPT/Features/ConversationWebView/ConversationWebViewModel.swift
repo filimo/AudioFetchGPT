@@ -177,9 +177,10 @@ final class ConversationWebViewModel: ObservableObject {
         scrollToReadAloudElement(at: currentReadAloudIndex)
     }
 
-    func clickAllVoicePlayTurnActionButtons() {
+    func clickAllVoicePlayTurnActionButtons(downloadedMessageIDs: [String]) {
         let script = """
             (function() {
+                window.__downloadedMessageIDs = \(downloadedMessageIDs);    
                 document.querySelectorAll('[data-testid="voice-play-turn-action-button"]').forEach(el => {
                     el.click();
                 });
@@ -211,5 +212,20 @@ final class ConversationWebViewModel: ObservableObject {
                 }
             }
         }
+    }
+
+    func getCurrentConversationId() -> String? {
+        guard let url = webView.url else { return nil }
+        
+        let pattern = "https://chatgpt.com/c/([a-zA-Z0-9-]+)"
+        let regex = try? NSRegularExpression(pattern: pattern)
+        let nsString = url.absoluteString as NSString
+        let results = regex?.matches(in: url.absoluteString, range: NSRange(location: 0, length: nsString.length))
+        
+        if let match = results?.first {
+            return nsString.substring(with: match.range(at: 1))
+        }
+        
+        return nil
     }
 }

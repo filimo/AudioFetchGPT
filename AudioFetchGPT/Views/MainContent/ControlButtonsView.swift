@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct ControlButtonsView: View {
+    @EnvironmentObject var downloadedAudios: DownloadedAudioStore
     @Binding var isSheetPresented: Bool
     var webViewModel: ConversationWebViewModel
     @Binding var isSearchVisible: Bool
@@ -129,12 +130,14 @@ struct ControlButtonsView: View {
                                 title: Text("Confirm Download"),
                                 message: Text("Are you sure you want to download all voice messages? This may take some time."),
                                 primaryButton: .default(Text("Yes"), action: {
-                                    webViewModel.clickAllVoicePlayTurnActionButtons()
+                                    if let converenceID = webViewModel.getCurrentConversationId() {
+                                        let downloadedMessageIDs = downloadedAudios.getDownloadedMessageIds(for: converenceID)
+                                        webViewModel.clickAllVoicePlayTurnActionButtons(downloadedMessageIDs: downloadedMessageIDs)
+                                    }
                                 }),
                                 secondaryButton: .cancel()
                             )
                         }
-
 
                         Button(action: {
                             isSheetPresented = true

@@ -163,4 +163,10 @@ class DownloadedAudioStore: ObservableObject {
     private func notifyDownloadCompleted(audio: DownloadedAudio) {
         NotificationCenter.default.post(name: .audioDownloadCompleted, object: audio)
     }
+
+    func getDownloadedMessageIds(for conversationId: String) -> [String] {
+        items
+            .filter { $0.conversationId == conversationId }
+            .map { $0.messageId }
+    }
 }
