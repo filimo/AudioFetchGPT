@@ -12,7 +12,9 @@ struct ControlButtonsView: View {
     @Binding var isSearchVisible: Bool
     @Binding var searchText: String
     @State private var showMenu: Bool = false // State for showing/hiding menu
-    @State private var showDownloadConfirmation: Bool = false 
+    @State private var showDownloadConfirmation: Bool = false
+    @State private var textFiles: [String] = []
+    @State private var showDocumentPicker = false
 
     var body: some View {
         // Floating button
@@ -90,23 +92,42 @@ struct ControlButtonsView: View {
                             .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                         }
 
-                        // Clipboard button
-                        Button(action: {
-                            if let clipboardText = UIPasteboard.general.string {
-                                webViewModel.sayChatGPT(clipboardText)
+                        HStack(spacing: 10) {
+                            // Кнопка для отправки из буфера обмена
+                            Button(action: {
+                                if let clipboardText = UIPasteboard.general.string {
+                                    webViewModel.sayChatGPT(clipboardText)
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "doc.on.clipboard")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.blue)
+                                    Text("Clipboard")
+                                        .foregroundColor(.primary)
+                                        .font(.system(size: 16, weight: .bold))
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                             }
-                        }) {
-                            HStack {
-                                Image(systemName: "paperplane.circle.fill")
-                                    .resizable()
-                                    .frame(width: 40, height: 40)
-                                    .foregroundColor(.purple)
-                                Text("Send from Clipboard")
-                                    .foregroundColor(.primary)
-                                    .font(.system(size: 16, weight: .bold))
+
+                            // Кнопка для отправки из файла
+                            Button(action: {
+                                showDocumentPicker = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "doc.text")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.green)
+                                    Text("File")
+                                        .foregroundColor(.primary)
+                                        .font(.system(size: 16, weight: .bold))
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                             }
-                            .padding()
-                            .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                         }
 
                         // Media-related buttons (Download/Show audios)
@@ -173,7 +194,15 @@ struct ControlButtonsView: View {
                     .foregroundColor(.blue)
             }
         }
+        .sheet(isPresented: $showDocumentPicker) {
+            DocumentPicker(textFiles: $textFiles)
+        }
         .padding(.bottom, 10) // Position the floating button at the bottom of the screen
         .padding(.trailing, 20)
+        .onChange(of: textFiles) { _, newValue in
+            if let value = newValue.first {
+                webViewModel.sayChatGPT(value)
+            }
+        }
     }
 }

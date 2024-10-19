@@ -32,7 +32,12 @@ struct MainContentView: View {
                 }
             }
 
-            ControlButtonsView(isSheetPresented: $isSheetPresented, webViewModel: webViewModel, isSearchVisible: $isSearchVisible, searchText: $searchText)
+            ControlButtonsView(
+                isSheetPresented: $isSheetPresented,
+                webViewModel: webViewModel,
+                isSearchVisible: $isSearchVisible,
+                searchText: $searchText
+            )
 
             if let audio = notificationAudio {
                 NotificationBannerView(audio: audio)
