@@ -1,8 +1,8 @@
-# AudioFetchGPT Documentation
+# AudioFetchChatGPT Documentation
 
 ## Overview
 
-AudioFetchGPT is an iOS application designed to interact with ChatGPT, allowing users to download and manage audio content from conversations. The app provides a web interface to ChatGPT, audio playback capabilities, and a download management system.
+AudioFetchChatGPT is an iOS application designed to interact with ChatGPT, allowing users to download and manage audio content from conversations. The app provides a web interface to ChatGPT, audio playback capabilities, and a download management system.
 
 
 <p float="left">

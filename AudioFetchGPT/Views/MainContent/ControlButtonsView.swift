@@ -65,7 +65,7 @@ struct ControlButtonsView: View {
                                     .resizable()
                                     .frame(width: 40, height: 40)
                                     .foregroundColor(.green)
-                                Text("Reload page")
+                                Text("Reload")
                                     .foregroundColor(.primary)
                                     .font(.system(size: 16, weight: .bold))
                             }
@@ -84,7 +84,7 @@ struct ControlButtonsView: View {
                                     .resizable()
                                     .frame(width: 40, height: 40)
                                     .foregroundColor(.orange)
-                                Text(isSearchVisible ? "Hide search" : "Show search")
+                                Text("Search")
                                     .foregroundColor(.primary)
                                     .font(.system(size: 16, weight: .bold))
                             }
@@ -168,7 +168,7 @@ struct ControlButtonsView: View {
                                     .resizable()
                                     .frame(width: 40, height: 40)
                                     .foregroundColor(.blue)
-                                Text("Show downloaded audios")
+                                Text("Downloaded audios")
                                     .foregroundColor(.primary)
                                     .font(.system(size: 16, weight: .bold))
                             }
