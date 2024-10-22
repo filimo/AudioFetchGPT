@@ -7,6 +7,8 @@ AudioFetchChatGPT is an iOS application designed to interact with ChatGPT, allow
 
 <p float="left">
   <img src="./Assets/main-view.jpeg" width="200" />
+  <img src="./Assets/showRetrySkipDialog.jpeg" width="200" />
+  <img src="./Assets/NotificationBanner.jpeg" width="200" />
   <img src="./Assets/downloaded-view.jpeg" width="200" />
   <img src="./Assets/texteditor-view.jpeg" width="200" />
   <img src="./Assets/lockscreen.jpg" width="200" />
