@@ -8,6 +8,7 @@ import SwiftUI
 
 class DownloadedAudioStore: ObservableObject {
     @Published var items: [DownloadedAudio] = []
+    @Published var queueLength: Int = 0
     @AppStorage(UserDefaultsKeys.savedMetaData) private var savedMetaData: String = "{}"
     @AppStorage("collapsedSections") private var collapsedSectionIDs: String = "[]"
 

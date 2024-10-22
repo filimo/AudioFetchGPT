@@ -6,7 +6,7 @@
     let processing = false;
 
     // Function to process the queue
-    function processQueue() {
+    async function processQueue() {
         if (queue.length === 0 || processing) {
             return;
         }
@@ -14,24 +14,29 @@
         processing = true;
         const { input, init, resolve, reject } = queue.shift();
 
-        originalFetch(input, init)
-            .then(response => handleResponse(response, input, init, resolve, reject))
-            .catch(error => handleFetchError(error, input, init, resolve, reject));
+        try {
+            const response = await originalFetch(input, init);
+            await handleResponse(response, input, init, resolve, reject);
+        } catch (error) {
+            await handleFetchError(error, input, init, resolve, reject);
+        }
     }
 
     // Function to handle the response
-    function handleResponse(response, input, init, resolve, reject) {
+    async function handleResponse(response, input, init, resolve, reject) {
         if (!response.ok) {
-            // Create an error based on the response status
             const error = new Error(`HTTP Error: ${response.status} ${response.statusText}`);
             error.response = response;
-            handleFetchError(error, input, init, resolve, reject);
+            await handleFetchError(error, input, init, resolve, reject);
             return;
         }
 
-        response.clone().blob()
-            .then(blob => processBlob(blob, input, response, resolve, reject))
-            .catch(error => handleBlobError(error, reject));
+        try {
+            const blob = await response.clone().blob();
+            await processBlob(blob, input, response, resolve, reject);
+        } catch (error) {
+            await handleBlobError(error, reject);
+        }
     }
 
     // Function to process the blob
@@ -53,7 +58,8 @@
             conversationId,
             messageId,
             audioData,
-            name
+            name,
+            queueLength: queue.length
         });
 
         resolve(response);
@@ -73,33 +79,21 @@
     function handleFetchError(error, input, init, resolve, reject) {
         console.error('Fetch error:', error);
 
-        // Extract messageId from the input URL
         const url = new URL(input, window.location.origin);
         const messageId = url.searchParams.get('message_id') || '';
 
-        // Get the message element and extract the first 50 characters
         const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
         const messageSnippet = messageElement ? messageElement.innerText.substring(0, 150) : 'Unknown message';
 
-        // Create a custom dialog with "Retry" and "Skip" buttons, including the message snippet
         showRetrySkipDialog(messageSnippet)
             .then(userChoice => {
                 if (userChoice === 'retry') {
-                    // Add the request back to the queue for retrying
-                    queue.unshift({
-                        input,
-                        init,
-                        resolve,
-                        reject
-                    });
-                    processing = false;
-                    processQueue();
+                    queue.unshift({ input, init, resolve, reject });
                 } else if (userChoice === 'skip') {
-                    // Skip the current request
-                    processing = false;
-                    processQueue();
-                    resolve(null);  // Resolve with null to signify skipping
+                    resolve(null); // Resolve with null to signify skipping
                 }
+                processing = false;
+                processQueue();
             })
             .catch(dialogError => {
                 console.error('Error displaying dialog:', dialogError);
@@ -114,26 +108,30 @@
         return new Promise((resolve) => {
             // Create dialog overlay
             const dialogOverlay = document.createElement('div');
-            dialogOverlay.style.position = 'fixed';
-            dialogOverlay.style.top = '0';
-            dialogOverlay.style.left = '0';
-            dialogOverlay.style.width = '100%';
-            dialogOverlay.style.height = '100%';
-            dialogOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-            dialogOverlay.style.display = 'flex';
-            dialogOverlay.style.alignItems = 'center';
-            dialogOverlay.style.justifyContent = 'center';
-            dialogOverlay.style.zIndex = '1000';
+            Object.assign(dialogOverlay.style, {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: '1000'
+            });
 
             // Create dialog box
             const dialogBox = document.createElement('div');
-            dialogBox.style.backgroundColor = '#fff';
-            dialogBox.style.padding = '20px';
-            dialogBox.style.borderRadius = '5px';
-            dialogBox.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
-            dialogBox.style.textAlign = 'center';
-            dialogBox.style.maxWidth = '400px';
-            dialogBox.style.width = '80%';
+            Object.assign(dialogBox.style, {
+                backgroundColor: '#fff',
+                padding: '20px',
+                borderRadius: '5px',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+                textAlign: 'center',
+                maxWidth: '400px',
+                width: '80%'
+            });
 
             // Message with snippet
             const message = document.createElement('p');
@@ -143,29 +141,35 @@
 
             // Buttons container
             const buttonsContainer = document.createElement('div');
-            buttonsContainer.style.marginTop = '20px';
-            buttonsContainer.style.display = 'flex';
-            buttonsContainer.style.justifyContent = 'space-around';
+            Object.assign(buttonsContainer.style, {
+                marginTop: '20px',
+                display: 'flex',
+                justifyContent: 'space-around'
+            });
 
             // Retry button
             const retryButton = document.createElement('button');
+            Object.assign(retryButton.style, {
+                padding: '10px 20px',
+                backgroundColor: '#4CAF50',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '3px',
+                cursor: 'pointer'
+            });
             retryButton.textContent = 'Retry';
-            retryButton.style.padding = '10px 20px';
-            retryButton.style.backgroundColor = '#4CAF50';
-            retryButton.style.color = '#fff';
-            retryButton.style.border = 'none';
-            retryButton.style.borderRadius = '3px';
-            retryButton.style.cursor = 'pointer';
 
             // Skip button
             const skipButton = document.createElement('button');
+            Object.assign(skipButton.style, {
+                padding: '10px 20px',
+                backgroundColor: '#f44336',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '3px',
+                cursor: 'pointer'
+            });
             skipButton.textContent = 'Skip';
-            skipButton.style.padding = '10px 20px';
-            skipButton.style.backgroundColor = '#f44336';
-            skipButton.style.color = '#fff';
-            skipButton.style.border = 'none';
-            skipButton.style.borderRadius = '3px';
-            skipButton.style.cursor = 'pointer';
 
             // Append buttons to container
             buttonsContainer.appendChild(retryButton);
@@ -190,15 +194,6 @@
     // Override the fetch function
     window.fetch = function(input, init) {
         if (typeof input === 'string' && input.includes('/backend-api/synthesize')) {
-            const url = new URL(input, window.location.origin);
-            const conversationId = url.searchParams.get('conversation_id') || '';
-            const messageId = url.searchParams.get('message_id') || '';
-
-            if (window.__downloadedMessageIDs && window.__downloadedMessageIDs.includes(messageId)) {
-                console.log(`Message ID ${messageId} already processed, fetch aborted.`);
-                return Promise.resolve(new Response(null, { status: 409, statusText: 'Conflict: already processed' }));
-            }
-
             return new Promise((resolve, reject) => {
                 queue.push({ input, init, resolve, reject });
                 processQueue();

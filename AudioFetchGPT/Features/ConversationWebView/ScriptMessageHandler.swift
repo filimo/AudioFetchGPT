@@ -22,9 +22,13 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
                 if let conversationId = body["conversationId"] as? String,
                    let messageId = body["messageId"] as? String,
                    let audioData = body["audioData"] as? String,
-                   let name = body["name"] as? String
+                   let name = body["name"] as? String,
+                   let queueLength = body["queueLength"] as? Int
                 {
-                    print("conversationId: \(conversationId), messageId: \(messageId)")
+                    print("queueLength: \(queueLength), conversationId: \(conversationId), messageId: \(messageId)")
+                    
+                    // Обновляем queueLength в DownloadedAudioStore
+                    downloadedAudios.queueLength = queueLength
                         
                     downloadAudio(from: audioData, conversationId: conversationId, messageId: messageId, name: name)
                 } else {
@@ -62,7 +66,7 @@ class ScriptMessageHandler: NSObject, WKScriptMessageHandler {
     
     private func playSignalSoundAndVibrate() {
         // Play a system sound (e.g., mail sent sound)
-        AudioServicesPlaySystemSound(1013) //"Тон успеха"
+//        AudioServicesPlaySystemSound(1013) //"Тон успеха"
         
         // Trigger device vibration
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)

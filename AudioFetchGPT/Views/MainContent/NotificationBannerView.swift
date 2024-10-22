@@ -15,7 +15,11 @@ struct NotificationBannerView: View {
         VStack {
             ScrollView {
                 VStack {
-                    Spacer()
+                    Text("Queue length: \(downloadedAudios.queueLength)")
+                        .padding(.top, 5)
+                        .foregroundColor(.white)
+                        .font(.subheadline)
+
                     Text(audio.fileName)
                         .padding()
                         .foregroundColor(.white)

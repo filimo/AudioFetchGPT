@@ -180,9 +180,13 @@ final class ConversationWebViewModel: ObservableObject {
     func clickAllVoicePlayTurnActionButtons(downloadedMessageIDs: [String]) {
         let script = """
             (function() {
-                window.__downloadedMessageIDs = \(downloadedMessageIDs);    
+                let downloadedMessageIDs = \(downloadedMessageIDs);    
                 document.querySelectorAll('[data-testid="voice-play-turn-action-button"]').forEach(el => {
-                    el.click();
+                    const messageId = el.closest('article')?.querySelector('[data-message-id]')?.dataset.messageId;
+
+                    if (downloadedMessageIDs.includes(messageId) == false) {
+                        el.click();
+                    }
                 });
             })();
         """
