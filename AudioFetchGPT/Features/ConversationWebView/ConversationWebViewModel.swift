@@ -166,6 +166,30 @@ final class ConversationWebViewModel: ObservableObject {
             }
         }
     }
+
+    func scrollToTopScreen() {
+        let script = "document.querySelector('article').scrollIntoView({ behavior: 'smooth', block: 'start' });"
+        webView.evaluateJavaScript(script) { _, error in
+            if let error = error {
+                print("Scroll to top error: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    func scrollToBottomScreen() {
+        let script = """
+            (function() {
+                let lastArticle = document.querySelectorAll('article')[document.querySelectorAll('article').length - 1];
+                lastArticle.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            })();
+        """
+        
+        webView.evaluateJavaScript(script) { _, error in
+            if let error = error {
+                print("Scroll to bottom error: \(error.localizedDescription)")
+            }
+        }
+    }
     
     func scrollToNextReadAloudElement() {
         currentReadAloudIndex += 1

@@ -30,6 +30,32 @@ struct ControlButtonsView: View {
                         // Navigation buttons (Previous/Next) in one line without text
                         HStack {
                             Button(action: {
+                                webViewModel.scrollToTopScreen()
+                            }) {
+                                HStack {
+                                    Image(systemName: "arrow.up.circle.fill")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                            }
+                        
+                            Button(action: {
+                                webViewModel.scrollToBottomScreen()
+                            }) {
+                                HStack {
+                                    Image(systemName: "arrow.down.circle.fill")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                            }
+
+                            Button(action: {
                                 webViewModel.scrollToPreviousReadAloudElement()
                             }) {
                                 HStack {
