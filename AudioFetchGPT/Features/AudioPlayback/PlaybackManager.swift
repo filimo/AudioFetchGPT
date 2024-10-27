@@ -71,14 +71,13 @@ class PlaybackManager: ObservableObject {
             prepareNewAudio(audio)
         }
 
-        togglePlayPause(for: audio)
+        startPlayback(for: audio)
     }
     
     private func prepareNewAudio(_ audio: DownloadedAudio) {
         guard playerManager.preparePlayer(for: audio.fileURL) else { return }
         currentAudioID = audio.id
         currentAudioPrivate = audio
-        seekAudio(for: audio, to: currentProgress)
         setPlaybackRate(Float(playbackRate))
     }
     
@@ -105,7 +104,7 @@ class PlaybackManager: ObservableObject {
         updateNowPlayingProgress()
     }
     
-    func seekAudio(for audio: DownloadedAudio, to progress: Double) {
+    func seek(for audio: DownloadedAudio, to progress: Double) {
         let newTime = progress * playerManager.duration
         playerManager.seek(to: newTime)
         currentTime = newTime
@@ -113,11 +112,17 @@ class PlaybackManager: ObservableObject {
         updateNowPlayingProgress()
     }
     
-    func seekBySeconds(for audio: DownloadedAudio, seconds: Double) {
-        let newTime = max(0, min(playerManager.currentTime + seconds, playerManager.duration))
-        playerManager.seek(to: newTime)
-        currentProgress = newTime / playerManager.duration
-        currentTime = newTime
+    func seek(for audio: DownloadedAudio, seconds: Double) {
+        if playerManager.currentTime + seconds >= playerManager.duration {
+            playNextAudio()
+        } else if playerManager.currentTime + seconds <= 0 {
+            playPreviousAudio()
+        } else {
+            let newTime = playerManager.currentTime + seconds
+            playerManager.seek(to: newTime)
+            currentProgress = newTime / playerManager.duration
+            currentTime = newTime
+        }
         updateNowPlayingProgress()
     }
     
@@ -206,7 +211,7 @@ class PlaybackManager: ObservableObject {
         guard let currentAudio = currentAudioPrivate else { return }
         // Убедимся, что position не превышает длительность
         let clampedPosition = max(0, min(position, playerManager.duration))
-        seekAudio(for: currentAudio, to: clampedPosition / playerManager.duration)
+        seek(for: currentAudio, to: clampedPosition / playerManager.duration)
     }
     
     func changePlaybackRate(to rate: Float) {

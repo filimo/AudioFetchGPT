@@ -12,28 +12,32 @@ struct SeekButtonsView: View {
 
     var body: some View {
         HStack {
-            Button(action: {
-                audioManager.seekBySeconds(for: audio, seconds: -5.0)
-            }) {
-                Image(systemName: "gobackward.5")
-                    .resizable()
-                    .frame(width: 30, height: 30)
+            if audioManager.currentAudioID == audio.id {
+                Button(action: {
+                    audioManager.seek(for: audio, seconds: -5.0)
+                }) {
+                    Image(systemName: "gobackward.5")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                }
+                .buttonStyle(BorderlessButtonStyle())
             }
-            .buttonStyle(BorderlessButtonStyle())
 
             Text(audioManager.currentTimeForAudio(audio.id))
                 .font(.subheadline)
                 .monospacedDigit()
                 .frame(minWidth: 50)
 
-            Button(action: {
-                audioManager.seekBySeconds(for: audio, seconds: +5.0)
-            }) {
-                Image(systemName: "goforward.5")
-                    .resizable()
-                    .frame(width: 30, height: 30)
+            if audioManager.currentAudioID == audio.id {
+                Button(action: {
+                    audioManager.seek(for: audio, seconds: +5.0)
+                }) {
+                    Image(systemName: "goforward.5")
+                        .resizable()
+                        .frame(width: 30, height: 30)
+                }
+                .buttonStyle(BorderlessButtonStyle())
             }
-            .buttonStyle(BorderlessButtonStyle())
         }
     }
 }
