@@ -17,9 +17,22 @@ struct EditConversationView: View {
                 .font(.headline)
                 .padding()
 
-            TextField("New Conversation Name", text: $newConversationName)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+            HStack {
+                TextField("New Conversation Name", text: $newConversationName)
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                Button(action: {
+                    if let clipboardText = UIPasteboard.general.string {
+                        newConversationName = clipboardText
+                    }
+                }) {
+                    Image(systemName: "doc.on.clipboard")
+                        .foregroundColor(.blue)
+                }
+                .buttonStyle(BorderlessButtonStyle()) // Чтобы избежать лишнего фона
+                .padding(.leading, 8)
+            }
+            .padding()
 
             HStack {
                 Button("Cancel", action: onCancel)
@@ -33,3 +46,4 @@ struct EditConversationView: View {
         .presentationDetents([.fraction(1 / 4)])
     }
 }
+
