@@ -170,4 +170,20 @@ class DownloadedAudioStore: ObservableObject {
             .filter { $0.conversationId == conversationId }
             .map { $0.messageId }
     }
+
+    func deleteConversation(conversationId: UUID) {
+        // Filter audio files that do not belong to the specified conversation
+        let audiosToDelete = items.filter { UUID(uuidString: $0.conversationId) == conversationId }
+        
+        // Delete files from the file system
+        for audio in audiosToDelete {
+            deleteAudio(audio)
+        }
+        
+        // Remove audio files from the list
+        items.removeAll { UUID(uuidString: $0.conversationId) == conversationId }
+        
+        // Save changes
+        saveDownloadedAudios()
+    }
 }

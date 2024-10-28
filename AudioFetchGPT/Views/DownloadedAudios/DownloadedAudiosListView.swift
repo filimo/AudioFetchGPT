@@ -31,10 +31,10 @@ struct DownloadedAudiosListView: View {
                     List {
                         ForEach(groupedAudios.keys.sorted(), id: \.self) { conversationId in
                             Section(header: SectionHeaderView(conversationId: conversationId,
-                                                          conversationName: downloadedAudios.getConversationName(by: conversationId),
-                                                          onEdit: { startEditing(conversationId) },
-                                                          onToggle: { downloadedAudios.toggleSection(conversationId) },
-                                                          isCollapsed: downloadedAudios.collapsedSections.contains(conversationId))
+                                                              conversationName: downloadedAudios.getConversationName(by: conversationId),
+                                                              onEdit: { startEditing(conversationId) },
+                                                              onToggle: { downloadedAudios.toggleSection(conversationId) },
+                                                              isCollapsed: downloadedAudios.collapsedSections.contains(conversationId))
                             ) {
                                 if !downloadedAudios.collapsedSections.contains(conversationId) {
                                     AudioListView(audios: groupedAudios[conversationId] ?? [],
@@ -60,12 +60,21 @@ struct DownloadedAudiosListView: View {
                 )) {
                     if let conversationId = editingConversationId {
                         // Extracted view for editing conversation name
-                        EditConversationView(conversationId: conversationId, newConversationName: $newConversationName, onCancel: {
-                            editingConversationId = nil
-                        }, onSave: {
-                            saveNewConversationName(conversationId: conversationId, newName: newConversationName)
-                            editingConversationId = nil
-                        })
+                        EditConversationView(
+                            conversationId: conversationId,
+                            newConversationName: $newConversationName,
+                            onCancel: {
+                                editingConversationId = nil
+                            },
+                            onSave: {
+                                saveNewConversationName(conversationId: conversationId, newName: newConversationName)
+                                editingConversationId = nil
+                            },
+                            onDelete: {
+                                deleteConversation(conversationId)
+                                editingConversationId = nil
+                            }
+                        )
                     }
                 }
                 .alert(isPresented: $showErrorAlert) {
@@ -109,5 +118,9 @@ struct DownloadedAudiosListView: View {
 
     private func moveAudio(conversationId: UUID, indices: IndexSet, newOffset: Int) {
         downloadedAudios.moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
+    }
+
+    private func deleteConversation(_ conversationId: UUID) {
+        downloadedAudios.deleteConversation(conversationId: conversationId)
     }
 }
