@@ -15,6 +15,7 @@ struct ControlButtonsView: View {
     @State private var showDownloadConfirmation: Bool = false
     @State private var textFiles: [String] = []
     @State private var showDocumentPicker = false
+    @State private var showSystemPromptPicker = false
 
     var body: some View {
         // Floating button
@@ -41,7 +42,7 @@ struct ControlButtonsView: View {
                                 .padding()
                                 .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
                             }
-                        
+
                             Button(action: {
                                 webViewModel.scrollToBottomScreen()
                             }) {
@@ -119,10 +120,23 @@ struct ControlButtonsView: View {
                         }
 
                         HStack(spacing: 10) {
+                            Button(action: {
+                                showSystemPromptPicker = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "gear")
+                                        .resizable()
+                                        .frame(width: 40, height: 40)
+                                        .foregroundColor(.blue)
+                                }
+                                .padding()
+                                .background(RoundedRectangle(cornerRadius: 10).fill(Color(.systemBackground)).shadow(radius: 5))
+                            }
+                            
                             // Кнопка для отправки из буфера обмена
                             Button(action: {
                                 if let clipboardText = UIPasteboard.general.string {
-                                    webViewModel.sayChatGPT(clipboardText)
+                                    webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(clipboardText)")
                                 }
                             }) {
                                 HStack {
@@ -130,7 +144,7 @@ struct ControlButtonsView: View {
                                         .resizable()
                                         .frame(width: 40, height: 40)
                                         .foregroundColor(.blue)
-                                    Text("Clipboard")
+                                    Text("Clip")
                                         .foregroundColor(.primary)
                                         .font(.system(size: 16, weight: .bold))
                                 }
@@ -223,11 +237,14 @@ struct ControlButtonsView: View {
         .sheet(isPresented: $showDocumentPicker) {
             DocumentPicker(textFiles: $textFiles)
         }
+        .sheet(isPresented: $showSystemPromptPicker) {
+            SystemPromptPicker(showSystemPromptPicker: $showSystemPromptPicker, conversationWebViewModel: webViewModel)
+        }
         .padding(.bottom, 10) // Position the floating button at the bottom of the screen
         .padding(.trailing, 20)
         .onChange(of: textFiles) { _, newValue in
             if let value = newValue.first {
-                webViewModel.sayChatGPT(value)
+                webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(value)")
             }
         }
     }

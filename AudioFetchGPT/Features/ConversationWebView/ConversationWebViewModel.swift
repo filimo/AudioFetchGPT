@@ -16,6 +16,8 @@ final class ConversationWebViewModel: ObservableObject {
     private var targetMessageId: String?
     private var currentReadAloudIndex: Int = 0
     
+    @Published var systemPrompt = ""
+
     init() {
         webView.isInspectable = true
         setupNavigationDelegate()
