@@ -126,28 +126,55 @@ final class ConversationWebViewModel: ObservableObject {
     }
     
     func sayChatGPT(_ text: String) {
-        guard let jsonData = try? JSONEncoder().encode(text),
-              let jsonString = String(data: jsonData, encoding: .utf8)
-        else {
-            print("Text encoding error")
-            return
-        }
-        
+        // Преобразуем символы новой строки для корректной интерпретации в JavaScript
+
+        let text = text.replacingOccurrences(of: "`", with: "\\`")
         let script = """
             (function() {
-                document.querySelector('#prompt-textarea').innerText += \(jsonString);
+                function setContentEditableText(id, text) {
+                    const editor = document.getElementById(id);
+                    if (!editor) {
+                        console.error(`Element with ID '${id}' not found.`);
+                        return;
+                    }
+
+                    // Focus on the element
+                    editor.focus();
+
+                    // Set the cursor to the end
+                    const range = document.createRange();
+                    const selection = window.getSelection();
+
+                    range.selectNodeContents(editor);
+                    range.collapse(false); // Moves the cursor to the end
+
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+
+                    // Insert text
+                    document.execCommand('insertText', false, text);
+
+                    // Send the 'input' event
+                    const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+                    editor.dispatchEvent(inputEvent);
+                }
+
+                // Using the function
+                setContentEditableText("prompt-textarea", `\(text)`);
+
                 setTimeout(() => {
                     document.querySelector('[data-testid="send-button"]').click();
                 }, 300);
             })();
         """
+
         webView.evaluateJavaScript(script) { _, error in
             if let error = error {
                 print("Text insertion error: \(error.localizedDescription)")
             }
         }
     }
-    
+
     func scrollToReadAloudElement(at index: Int) {
         let script = """
             (function() {
