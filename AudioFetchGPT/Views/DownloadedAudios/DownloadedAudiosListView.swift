@@ -46,6 +46,11 @@ struct DownloadedAudiosListView: View {
                             }
                         }
                     }
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            EditButton()
+                        }
+                    }
                     .listStyle(InsetGroupedListStyle())
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
