@@ -12,7 +12,17 @@ import SwiftUI
 
 class PlaybackManager: ObservableObject {
     @Published var isPlaying = false
-    @AppStorage("currentAudioID") var currentAudioIDString: String = ""
+    @AppStorage("currentAudioID") private var _currentAudioIDString: String = "" // приватное поле
+    var currentAudioIDString: String {
+        get { _currentAudioIDString }
+        set {
+            if _currentAudioIDString != newValue { // предотвращаем рекурсию
+                _currentAudioIDString = newValue
+                synchronizeCurrentAudio()
+            }
+        }
+    }
+
     @Published private(set) var currentTime: Double = 0
     @Published var messageId: String = ""
     
@@ -25,11 +35,20 @@ class PlaybackManager: ObservableObject {
     private let playerManager = PlayerManager()
     private let progressManager = ProgressManager()
     private var timerManager = TimerManager()
-    private var currentAudioPrivate: DownloadedAudio?
-    private var audioPlayerDelegate: PlaybackDelegate?
+    private var currentAudioPrivate: DownloadedAudio? {
+        didSet {
+            if let audio = currentAudioPrivate {
+                currentAudioIDString = audio.id.uuidString
+            } else {
+                currentAudioIDString = ""
+            }
+        }
+    }
     
     private var downloadedAudios: DownloadedAudioStore
     private var lockScreenManager: LockScreenHandler?
+    
+    private var audioPlayerDelegate: PlaybackDelegate?
 
     init(downloadedAudios: DownloadedAudioStore) {
         self.downloadedAudios = downloadedAudios
@@ -45,6 +64,9 @@ class PlaybackManager: ObservableObject {
         NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: nil, queue: .main) { [weak self] _ in
             self?.handleAudioFinished()
         }
+        
+        // Первоначальная синхронизация
+        synchronizeCurrentAudio()
     }
     
     private func setupLockScreenManager() {
@@ -64,6 +86,17 @@ class PlaybackManager: ObservableObject {
     // Публичное свойство для доступа к currentAudio
     var currentAudio: DownloadedAudio? {
         return currentAudioPrivate
+    }
+    
+    /// Метод синхронизации currentAudioPrivate с currentAudioIDString
+    private func synchronizeCurrentAudio() {
+        if let audioID = UUID(uuidString: currentAudioIDString),
+           let audio = downloadedAudios.items.first(where: { $0.id == audioID })
+        {
+            prepareNewAudio(audio)
+        } else {
+            currentAudioPrivate = nil
+        }
     }
     
     func playAudio(for audio: DownloadedAudio) {
