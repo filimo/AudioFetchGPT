@@ -11,6 +11,7 @@ struct AudioListView: View {
     var audios: [DownloadedAudio]
     var onDelete: (DownloadedAudio) -> Void
     var onMove: (IndexSet, Int) -> Void // Callback for moving items
+    var onShare: (DownloadedAudio) -> Void
 
     var body: some View {
         ForEach(audios) { audio in
@@ -21,6 +22,12 @@ struct AudioListView: View {
                         onDelete(audio)
                     } label: {
                         Label("Delete", systemImage: "trash")
+                    }
+
+                    Button {
+                        onShare(audio)
+                    } label: {
+                        Label("Share", systemImage: "square.and.arrow.up")
                     }
                 }
         }

@@ -18,6 +18,9 @@ struct DownloadedAudiosListView: View {
     @State var showErrorAlert: Bool = false
     @State var errorMessage: String = ""
 
+    @State private var showShareSheet = false
+    @State private var shareItems: [URL] = []
+
     var groupedAudios: [UUID: [DownloadedAudio]] {
         Dictionary(grouping: downloadedAudios.items, by: { UUID(uuidString: $0.conversationId)! })
     }
@@ -37,11 +40,17 @@ struct DownloadedAudiosListView: View {
                                                               isCollapsed: downloadedAudios.collapsedSections.contains(conversationId))
                             ) {
                                 if !downloadedAudios.collapsedSections.contains(conversationId) {
-                                    AudioListView(audios: groupedAudios[conversationId] ?? [],
-                                                  onDelete: deleteAudio,
-                                                  onMove: { indices, newOffset in
-                                                      moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
-                                                  })
+                                    AudioListView(
+                                        audios: groupedAudios[conversationId] ?? [],
+                                        onDelete: deleteAudio,
+                                        onMove: { indices, newOffset in
+                                            moveAudio(conversationId: conversationId, indices: indices, newOffset: newOffset)
+                                        },
+                                        onShare: { audio in
+                                            shareItems = [audio.fileURL]
+                                            showShareSheet = true
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -88,6 +97,13 @@ struct DownloadedAudiosListView: View {
                         message: Text(errorMessage),
                         dismissButton: .default(Text("OK"))
                     )
+                }
+                .sheet(isPresented: $showShareSheet) {
+                    ShareSheet(items: shareItems)
+                }
+                .onChange(of: showShareSheet) { _, _ in
+                    // This change handler is necessary to ensure that shareItems are updated when showShareSheet changes
+                    // Without it, shareItems in .sheet(isPresented: $showShareSheet) might be empty
                 }
             }
         }

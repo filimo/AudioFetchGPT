@@ -34,7 +34,6 @@
 		F0C5E6FB2CAE5F74009F0441 /* Exceptions for "Assets" folder in "AudioFetchGPT" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				"downloaded-view.jpeg",
 				"texteditor-view.jpeg",
 			);
 			target = F071E9CE2C98303900423E5F /* AudioFetchGPT */;
