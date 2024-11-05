@@ -42,7 +42,9 @@ struct SystemPromptPicker: View {
                         }
                     
                     ForEach(systemPrompts) { prompt in
-                        Text(prompt.value)
+                        Text(prompt.value.replacingOccurrences(of: "\n", with: ""))
+                            .lineLimit(5)
+                            .truncationMode(.middle)
                             .font(.headline)
                             .padding(.vertical, 5)
                             .swipeActions(edge: .trailing) {

@@ -70,6 +70,4 @@ struct MainContentView: View {
     }
 }
 
-#Preview {
-    MainContentView()
-}
+

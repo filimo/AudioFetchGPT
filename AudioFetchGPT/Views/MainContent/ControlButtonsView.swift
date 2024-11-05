@@ -87,7 +87,7 @@ struct ControlButtonsView: View {
                 .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
             }
 
-            Spacer().frame(height: 150)
+            Spacer().frame(height: 180)
             
             // Bottom panel with menu and playback buttons
             HStack {
@@ -141,6 +141,7 @@ struct ControlButtonsView: View {
             if let value = newValue.first {
                 webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(value)")
             }
+            textFiles = []
         }
     }
 }
