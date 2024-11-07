@@ -49,6 +49,8 @@ class PlaybackManager: ObservableObject {
     private var lockScreenManager: LockScreenHandler?
     
     private var audioPlayerDelegate: PlaybackDelegate?
+    
+    private var cancellables = Set<AnyCancellable>()
 
     init(downloadedAudios: DownloadedAudioStore) {
         self.downloadedAudios = downloadedAudios
@@ -67,6 +69,41 @@ class PlaybackManager: ObservableObject {
         
         // Первоначальная синхронизация
         synchronizeCurrentAudio()
+    }
+    
+    private func setupInterruptionHandling() {
+        NotificationCenter.default.publisher(for: AVAudioSession.interruptionNotification)
+            .compactMap { $0.userInfo }
+            .sink { [weak self] userInfo in
+                self?.handleInterruption(userInfo: userInfo)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func handleInterruption(userInfo: [AnyHashable: Any]) {
+        guard let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+        else {
+            return
+        }
+
+        switch type {
+        case .began:
+            isPlaying = false
+            playerManager.pause()
+
+        case .ended:
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    playerManager.play()
+                    isPlaying = true
+                }
+            }
+
+        @unknown default:
+            break
+        }
     }
     
     private func setupLockScreenManager() {
