@@ -12,11 +12,11 @@ import SwiftUI
 
 class PlaybackManager: ObservableObject {
     @Published var isPlaying = false
-    @AppStorage("currentAudioID") private var _currentAudioIDString: String = "" // приватное поле
+    @AppStorage("currentAudioID") private var _currentAudioIDString: String = "" // private field
     var currentAudioIDString: String {
         get { _currentAudioIDString }
         set {
-            if _currentAudioIDString != newValue { // предотвращаем рекурсию
+            if _currentAudioIDString != newValue { // prevent recursion
                 _currentAudioIDString = newValue
                 synchronizeCurrentAudio()
             }
@@ -67,7 +67,7 @@ class PlaybackManager: ObservableObject {
             self?.handleAudioFinished()
         }
         
-        // Первоначальная синхронизация
+        // Initial synchronization
         synchronizeCurrentAudio()
     }
     
@@ -120,12 +120,12 @@ class PlaybackManager: ObservableObject {
         set { currentAudioIDString = newValue.uuidString }
     }
     
-    // Публичное свойство для доступа к currentAudio
+    // Public property for accessing currentAudio
     var currentAudio: DownloadedAudio? {
         return currentAudioPrivate
     }
     
-    /// Метод синхронизации currentAudioPrivate с currentAudioIDString
+    /// Method to synchronize currentAudioPrivate with currentAudioIDString
     private func synchronizeCurrentAudio() {
         if let audioID = UUID(uuidString: currentAudioIDString),
            let audio = downloadedAudios.items.first(where: { $0.id == audioID })
@@ -251,23 +251,33 @@ class PlaybackManager: ObservableObject {
     
     func playNextAudio() {
         guard let currentAudio = currentAudioPrivate,
-              let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudio.id }),
-              currentIndex + 1 < downloadedAudios.items.count
+              let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudio.id })
         else {
-            // Нет следующего аудио для воспроизведения
+            // No current audio or it is not found in the list
             return
         }
         
-        let nextAudio = downloadedAudios.items[currentIndex + 1]
-        playAudio(for: nextAudio)
+        // Iterate through elements after the current one
+        for nextIndex in (currentIndex + 1) ..< downloadedAudios.items.count {
+            let nextAudio = downloadedAudios.items[nextIndex]
+            
+            // Check if conversationName matches
+            if nextAudio.conversationId == currentAudio.conversationId {
+                playAudio(for: nextAudio)
+                return // Stop searching after finding the first match
+            }
+        }
+        
+        // If there are no matches with the same conversation name, playback can be stopped or other actions can be performed
+        print("No more audios with the same conversation name")
     }
-    
+
     func playPreviousAudio() {
         guard let currentAudio = currentAudioPrivate,
               let currentIndex = downloadedAudios.items.firstIndex(where: { $0.id == currentAudio.id }),
               currentIndex - 1 >= 0
         else {
-            // Нет предыдущего аудио для воспроизведения
+            // No previous audio to play
             return
         }
         
@@ -275,11 +285,11 @@ class PlaybackManager: ObservableObject {
         playAudio(for: previousAudio)
     }
     
-    // MARK: - Добавленный метод для поиска позиции воспроизведения
+    // MARK: - Added method for finding playback position
     
     func seek(to position: Double) {
         guard let currentAudio = currentAudioPrivate else { return }
-        // Убедимся, что position не превышает длительность
+        // Ensure that position does not exceed duration
         let clampedPosition = max(0, min(position, playerManager.duration))
         seek(for: currentAudio, to: clampedPosition / playerManager.duration)
     }
