@@ -46,12 +46,12 @@ struct ControlButtonsView: View {
                         
                         // Page management group (refresh and search)
                         HStack(spacing: 10) {
-                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "Reload", action: {
-                                webViewModel.reload()
-                            })
                             ControlButtonView(icon: "magnifyingglass.circle.fill", color: .orange, label: "Search", action: {
                                 isSearchVisible.toggle()
                                 if !isSearchVisible { searchText = "" }
+                            })
+                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "Reload", action: {
+                                webViewModel.reload()
                             })
                         }
                         
