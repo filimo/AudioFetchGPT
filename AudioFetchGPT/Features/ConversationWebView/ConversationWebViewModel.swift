@@ -38,6 +38,31 @@ final class ConversationWebViewModel: ObservableObject {
             
             let userScript = WKUserScript(source: jsScript, injectionTime: .atDocumentStart, forMainFrameOnly: false)
             webView.configuration.userContentController.addUserScript(userScript)
+            
+            // Добавляем CSS для предотвращения зума
+            let css = """
+                input, textarea {
+                    font-size: 16px !important;
+                }
+            """
+            let jsCSS = """
+                var style = document.createElement('style');
+                style.innerHTML = `\(css)`;
+                document.head.appendChild(style);
+            """
+            let cssScript = WKUserScript(source: jsCSS, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+            webView.configuration.userContentController.addUserScript(cssScript)
+            
+            // Добавляем JavaScript для фиксации положения элементов
+            let focusScript = """
+                document.addEventListener('focus', function(event) {
+                    setTimeout(function() {
+                        event.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 1000);
+                }, true);
+            """
+            let focusUserScript = WKUserScript(source: focusScript, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+            webView.configuration.userContentController.addUserScript(focusUserScript)
         } catch {
             print("Error loading JavaScript: \(error.localizedDescription)")
             return
