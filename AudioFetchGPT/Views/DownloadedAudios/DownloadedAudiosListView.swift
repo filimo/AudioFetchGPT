@@ -11,6 +11,7 @@ struct DownloadedAudiosListView: View {
     @EnvironmentObject var webViewModel: ConversationWebViewModel
     @EnvironmentObject var audioManager: PlaybackManager
     @EnvironmentObject var viewModel: ConversationWebViewModel
+    @Environment(\.scenePhase) private var scenePhase
 
     @State private var editingConversationId: UUID?
     @State private var newConversationName: String = ""
@@ -64,6 +65,13 @@ struct DownloadedAudiosListView: View {
                     .onAppear {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             reader.scrollTo(audioManager.currentAudioID)
+                        }
+                    }
+                    .onChange(of: scenePhase) { _, newPhase in
+                        if newPhase == .active {
+                            withAnimation {
+                                reader.scrollTo(audioManager.currentAudioID)
+                            }
                         }
                     }
                 }
