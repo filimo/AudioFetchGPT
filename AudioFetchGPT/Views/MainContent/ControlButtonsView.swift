@@ -17,6 +17,8 @@ struct ControlButtonsView: View {
     @State private var textFiles: [String] = []
     @State private var showDocumentPicker = false
     @State private var showSystemPromptPicker = false
+    @State private var showFragmentsSheet = false
+    @StateObject private var fragmentsStore = SelectedFragmentsStore()
 
     var body: some View {
         VStack {
@@ -46,11 +48,25 @@ struct ControlButtonsView: View {
                         
                         // Page management group (refresh and search)
                         HStack(spacing: 10) {
-                            ControlButtonView(icon: "magnifyingglass.circle.fill", color: .orange, label: "Search", action: {
+                            ControlButtonView(icon: "text.quote", color: .blue, label: "", action: {
+                                webViewModel.getSelectedText { text in
+                                    if let text = text, !text.isEmpty {
+                                        fragmentsStore.addFragment(
+                                            text: text,
+                                            messageId: webViewModel.currentMessageId ?? "",
+                                            conversationId: webViewModel.conversationId ?? ""
+                                        )
+                                    }
+                                }
+                            })
+                            ControlButtonView(icon: "list.bullet.clipboard.fill", color: .green, label: "", action: {
+                                showFragmentsSheet = true
+                            })
+                            ControlButtonView(icon: "magnifyingglass.circle.fill", color: .orange, label: "", action: {
                                 isSearchVisible.toggle()
                                 if !isSearchVisible { searchText = "" }
                             })
-                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "Reload", action: {
+                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "", action: {
                                 webViewModel.reload()
                             })
                         }
@@ -136,6 +152,11 @@ struct ControlButtonsView: View {
         }
         .sheet(isPresented: $showSystemPromptPicker) {
             SystemPromptPicker(showSystemPromptPicker: $showSystemPromptPicker, conversationWebViewModel: webViewModel)
+        }
+        .sheet(isPresented: $showFragmentsSheet) {
+            SelectedFragmentsView()
+                .environmentObject(fragmentsStore)
+                .environmentObject(webViewModel)
         }
         .onChange(of: textFiles) { _, newValue in
             if let value = newValue.first {

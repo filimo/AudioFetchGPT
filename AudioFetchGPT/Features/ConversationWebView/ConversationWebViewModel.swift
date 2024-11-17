@@ -16,6 +16,9 @@ final class ConversationWebViewModel: ObservableObject {
     private var targetMessageId: String?
     private var currentReadAloudIndex: Int = 0
     
+    @Published var currentMessageId: String?
+    @Published var conversationId: String?
+    
     @AppStorage("systemPrompt") var systemPrompt = ""
 
     init() {
@@ -309,5 +312,26 @@ final class ConversationWebViewModel: ObservableObject {
         }
         
         return nil
+    }
+    
+    func getSelectedText(completion: @escaping (String?) -> Void) {
+        let script = """
+            (function() {
+                let selection = window.getSelection();
+                let text = selection ? selection.toString() : '';
+                let messageId = selection?.anchorNode?.parentElement?.closest('article')?.querySelector('[data-message-id]')?.dataset?.messageId || '';
+                return { text, messageId };
+            })()
+        """
+        
+        webView.evaluateJavaScript(script) { result, error in
+            if let dict = result as? [String: String] {
+                self.currentMessageId = dict["messageId"]
+                self.conversationId = self.getCurrentConversationId()
+                completion(dict["text"])
+            } else {
+                completion(nil)
+            }
+        }
     }
 }
