@@ -5,17 +5,15 @@ struct SelectedFragmentsView: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var webViewModel: ConversationWebViewModel
 
+    @State private var fragmentToEdit: SelectedFragment? = nil
+
     var body: some View {
         NavigationView {
             List {
                 ForEach(fragmentsStore.fragments) { fragment in
                     FragmentItemView(fragment: fragment)
                         .onTapGesture {
-                            webViewModel.gotoMessage(
-                                conversationId: fragment.conversationId,
-                                messageId: fragment.messageId
-                            )
-                            dismiss()
+                            fragmentToEdit = fragment
                         }
                 }
                 .onDelete { indexSet in
@@ -31,6 +29,11 @@ struct SelectedFragmentsView: View {
                         dismiss()
                     }
                 }
+            }
+            .sheet(item: $fragmentToEdit) { fragment in
+                EditFragmentView(fragment: fragment)
+                    .environmentObject(fragmentsStore)
+                    .environmentObject(webViewModel)
             }
         }
     }

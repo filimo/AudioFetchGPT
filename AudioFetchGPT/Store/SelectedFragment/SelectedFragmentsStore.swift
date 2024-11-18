@@ -26,6 +26,12 @@ class SelectedFragmentsStore: ObservableObject {
         fragments.remove(at: index)
     }
 
+    func updateFragment(_ fragment: SelectedFragment) {
+        if let index = fragments.firstIndex(where: { $0.id == fragment.id }) {
+            fragments[index] = fragment
+        }
+    }
+
     private func loadFragments() {
         if let data = UserDefaults.standard.data(forKey: key),
            let decoded = try? JSONDecoder().decode([SelectedFragment].self, from: data) {
