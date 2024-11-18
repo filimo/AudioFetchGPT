@@ -1,8 +1,10 @@
 //
+//  ControlButtonsView.swift
 //  AudioFetchGPT
 //
 //  Created by Viktor Kushnerov on 20.09.24.
 //
+
 import SwiftUI
 
 struct ControlButtonsView: View {
@@ -24,7 +26,7 @@ struct ControlButtonsView: View {
         VStack {
             Spacer()
             
-            // Panel with menu buttons, if showMenu == true
+            // Панель с кнопками меню, если showMenu == true
             if showMenu {
                 HStack {
                     Spacer()
@@ -32,23 +34,23 @@ struct ControlButtonsView: View {
                     VStack(alignment: .trailing, spacing: 16) {
                         // Navigation group (up, down, left, right)
                         HStack(spacing: 10) {
-                            ControlButtonView(icon: "arrow.up.circle.fill", action: {
+                            ControlButtonView(icon: "arrow.up.circle.fill", label: "Up", action: {
                                 webViewModel.scrollToTopScreen()
                             })
-                            ControlButtonView(icon: "arrow.down.circle.fill", action: {
+                            ControlButtonView(icon: "arrow.down.circle.fill", label: "Down", action: {
                                 webViewModel.scrollToBottomScreen()
                             })
-                            ControlButtonView(icon: "arrow.left.circle.fill", action: {
+                            ControlButtonView(icon: "arrow.left.circle.fill", label: "Left", action: {
                                 webViewModel.scrollToPreviousReadAloudElement()
                             })
-                            ControlButtonView(icon: "arrow.right.circle.fill", action: {
+                            ControlButtonView(icon: "arrow.right.circle.fill", label: "Right", action: {
                                 webViewModel.scrollToNextReadAloudElement()
                             })
                         }
                         
-                        // Page management group (refresh and search)
+                        // Page management group (update and search)
                         HStack(spacing: 10) {
-                            ControlButtonView(icon: "text.quote", color: .blue, label: "", action: {
+                            ControlButtonView(icon: "text.quote", color: .blue, label: "Fragment", action: {
                                 webViewModel.getSelectedText { text in
                                     if let text = text, !text.isEmpty {
                                         fragmentsStore.addFragment(
@@ -59,25 +61,25 @@ struct ControlButtonsView: View {
                                     }
                                 }
                             })
-                            ControlButtonView(icon: "list.bullet.clipboard.fill", color: .green, label: "", action: {
+                            ControlButtonView(icon: "list.bullet.clipboard.fill", color: .green, label: "Fragments", action: {
                                 showFragmentsSheet = true
                             })
-                            ControlButtonView(icon: "magnifyingglass.circle.fill", color: .orange, label: "", action: {
+                            ControlButtonView(icon: "magnifyingglass.circle.fill", color: .orange, label: "Search", action: {
                                 isSearchVisible.toggle()
                                 if !isSearchVisible { searchText = "" }
                             })
-                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "", action: {
+                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "Update", action: {
                                 webViewModel.reload()
                             })
                         }
                         
-                        // Additional buttons group (System Prompt, Clipboard, File)
+                        // Additional buttons (System prompts, Clipboard, File)
                         HStack(spacing: 10) {
-                            ControlButtonView(icon: "gear", color: .blue, label: "Prompts", action: {
+                            ControlButtonView(icon: "gear", color: .blue, label: "System prompts", action: {
                                 showSystemPromptPicker = true
                             })
                             
-                            ControlButtonView(icon: "doc.on.clipboard", color: .blue, label: "Clip", action: {
+                            ControlButtonView(icon: "doc.on.clipboard", color: .blue, label: "Clipboard", action: {
                                 if let clipboardText = UIPasteboard.general.string {
                                     webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(clipboardText)")
                                 }
@@ -88,12 +90,12 @@ struct ControlButtonsView: View {
                             })
                         }
                         
-                        // Media control group
+                        // Media management group
                         HStack(spacing: 10) {
                             ControlButtonView(icon: "arrow.down.circle.fill", color: .yellow, label: "Download", action: {
                                 showDownloadConfirmation = true
                             })
-                            ControlButtonView(icon: "music.note", color: .blue, label: "Audios", action: {
+                            ControlButtonView(icon: "music.note", color: .blue, label: "Audio", action: {
                                 isSheetPresented = true
                             })
                         }
@@ -105,20 +107,14 @@ struct ControlButtonsView: View {
 
             Spacer().frame(height: 180)
             
-            // Bottom panel with menu and playback buttons
+            // Lower panel with menu and playback controls
             HStack {
-                Button(action: {
+                ControlButtonView(icon: showMenu ? "xmark.circle.fill" : "line.horizontal.3.circle.fill", label: "Menu", action: {
                     withAnimation { showMenu.toggle() }
-                }) {
-                    Image(systemName: showMenu ? "xmark.circle.fill" : "line.horizontal.3.circle.fill")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .foregroundColor(.blue)
-                }
+                }, iconWidth: 24, iconHeight: 24)
                 .padding(.trailing, 10)
                 
-                
-                Button(action: {
+                ControlButtonView(icon: audioManager.isPlaying ? "pause.circle.fill" : "play.circle.fill", label: audioManager.isPlaying ? "Pause" : "Play", action: {
                     if audioManager.isPlaying {
                         audioManager.pauseAudio()
                     } else {
@@ -126,18 +122,13 @@ struct ControlButtonsView: View {
                             audioManager.playAudio(for: currentAudio)
                         }
                     }
-                }) {
-                    Image(systemName: audioManager.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                        .resizable()
-                        .frame(width: 30, height: 30)
-                        .foregroundColor(.blue)
-                }
+                }, iconWidth: 24, iconHeight: 24)
             }
         }
         .alert(isPresented: $showDownloadConfirmation) {
             Alert(
-                title: Text("Confirm Download"),
-                message: Text("Are you sure you want to download all voice messages?"),
+                title: Text("Confirm download"),
+                message: Text("Are you sure you want to download all audio messages?"),
                 primaryButton: .default(Text("Yes"), action: {
                     if let conversationID = webViewModel.getCurrentConversationId() {
                         let downloadedMessageIDs = downloadedAudios.getDownloadedMessageIds(for: conversationID)
@@ -163,6 +154,35 @@ struct ControlButtonsView: View {
                 webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(value)")
             }
             textFiles = []
+        }
+    }
+}
+
+extension ControlButtonsView {
+    struct ControlButtonView: View {
+        let icon: String
+        var color: Color = .primary
+        var label: String
+        var action: () -> Void
+        var iconWidth: CGFloat = 30
+        var iconHeight: CGFloat = 30
+        
+        var body: some View {
+            Button(action: action) {
+                VStack {
+                    Image(systemName: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: iconWidth, height: iconHeight)
+                        .foregroundColor(color)
+                    if !label.isEmpty {
+                        Text(label)
+                            .font(.caption)
+                            .foregroundColor(color)
+                    }
+                }
+                .padding(.horizontal, 5)
+            }
         }
     }
 }
