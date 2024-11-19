@@ -1,14 +1,14 @@
 import SwiftUI
 
-struct FragmentItemView: View {
-    let fragment: SelectedFragment
+struct NoteItemView: View {
+    let note: Note
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(fragment.text)
+            Text(note.text)
                 .padding(.vertical, 4)
 
-            Text(fragment.timestamp, style: .date)
+            Text(note.timestamp, style: .date)
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

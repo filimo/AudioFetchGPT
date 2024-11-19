@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct SelectedFragment: Identifiable, Codable {
+struct Note: Identifiable, Codable {
     var id = UUID()
     let text: String
     let messageId: String

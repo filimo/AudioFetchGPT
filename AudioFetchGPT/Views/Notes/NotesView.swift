@@ -1,28 +1,28 @@
 import SwiftUI
 
-struct SelectedFragmentsView: View {
-    @EnvironmentObject var fragmentsStore: SelectedFragmentsStore
+struct NotesView: View {
+    @EnvironmentObject var notesStore: NotesStore
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var webViewModel: ConversationWebViewModel
 
-    @State private var fragmentToEdit: SelectedFragment? = nil
+    @State private var noteToEdit: Note? = nil
 
     var body: some View {
         NavigationView {
             List {
-                ForEach(fragmentsStore.fragments) { fragment in
-                    FragmentItemView(fragment: fragment)
+                ForEach(notesStore.notes) { note in
+                    NoteItemView(note: note)
                         .onTapGesture {
-                            fragmentToEdit = fragment
+                            noteToEdit = note
                         }
                 }
                 .onDelete { indexSet in
                     for index in indexSet {
-                        fragmentsStore.removeFragment(at: index)
+                        notesStore.removeNote(at: index)
                     }
                 }
             }
-            .navigationTitle("Selected Fragments")
+            .navigationTitle("Notes")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -30,9 +30,9 @@ struct SelectedFragmentsView: View {
                     }
                 }
             }
-            .sheet(item: $fragmentToEdit) { fragment in
-                EditFragmentView(fragment: fragment)
-                    .environmentObject(fragmentsStore)
+            .sheet(item: $noteToEdit) { note in
+                EditNoteView(note: note)
+                    .environmentObject(notesStore)
                     .environmentObject(webViewModel)
             }
         }

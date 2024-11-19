@@ -1,11 +1,11 @@
 import SwiftUI
 
-struct EditFragmentView: View {
-    @EnvironmentObject var fragmentsStore: SelectedFragmentsStore
+struct EditNoteView: View {
+    @EnvironmentObject var notesStore: NotesStore
     @EnvironmentObject var webViewModel: ConversationWebViewModel
     @Environment(\.dismiss) var dismiss
 
-    @State var fragment: SelectedFragment
+    @State var note: Note
     @State private var editedText: String = ""
 
     var body: some View {
@@ -14,7 +14,7 @@ struct EditFragmentView: View {
                 TextEditor(text: $editedText)
                     .padding()
                     .onAppear {
-                        editedText = fragment.text
+                        editedText = note.text
                     }
 
                 HStack(spacing: 16) {
@@ -33,8 +33,8 @@ struct EditFragmentView: View {
 
                     Button(action: {
                         webViewModel.gotoMessage(
-                            conversationId: fragment.conversationId,
-                            messageId: fragment.messageId
+                            conversationId: note.conversationId,
+                            messageId: note.messageId
                         )
                         dismiss()
                     }) {
@@ -50,7 +50,7 @@ struct EditFragmentView: View {
                 }
                 .padding([.leading, .trailing, .bottom], 16)
             }
-            .navigationTitle("Edit Fragment")
+            .navigationTitle("Edit Note")
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Cancel") {
@@ -59,19 +59,19 @@ struct EditFragmentView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        if fragmentsStore.fragments.contains(where: { $0.id == fragment.id }) {
-                            fragmentsStore.updateFragment(SelectedFragment(
-                                id: fragment.id,
+                        if notesStore.notes.contains(where: { $0.id == note.id }) {
+                            notesStore.updateNote(Note(
+                                id: note.id,
                                 text: editedText,
-                                messageId: fragment.messageId,
-                                conversationId: fragment.conversationId,
-                                timestamp: fragment.timestamp
+                                messageId: note.messageId,
+                                conversationId: note.conversationId,
+                                timestamp: note.timestamp
                             ))
                         } else {
-                            fragmentsStore.addFragment(
+                            notesStore.addNote(
                                 text: editedText,
-                                messageId: fragment.messageId,
-                                conversationId: fragment.conversationId
+                                messageId: note.messageId,
+                                conversationId: note.conversationId
                             )
                         }
                         dismiss()

@@ -14,15 +14,15 @@ struct ControlButtonsView: View {
     var webViewModel: ConversationWebViewModel
     @Binding var isSearchVisible: Bool
     @Binding var searchText: String
-    @EnvironmentObject var fragmentsStore: SelectedFragmentsStore
+    @EnvironmentObject var notesStore: NotesStore
 
     @State private var showMenu: Bool = false
     @State private var showDownloadConfirmation: Bool = false
     @State private var textFiles: [String] = []
     @State private var showDocumentPicker = false
     @State private var showSystemPromptPicker = false
-    @State private var showFragmentsSheet = false
-    @State private var fragmentToEdit: SelectedFragment? = nil
+    @State private var showNoteSheet = false
+    @State private var noteToEdit: Note? = nil
 
     var body: some View {
         VStack {
@@ -52,21 +52,21 @@ struct ControlButtonsView: View {
                         
                         // Page management group (update and search)
                         HStack(spacing: 10) {
-                            ControlButtonView(icon: "text.quote", color: .blue, label: "Fragment", action: {
+                            ControlButtonView(icon: "text.quote", color: .blue, label: "Note", action: {
                                 webViewModel.getSelectedText { text in
                                     if let text = text, !text.isEmpty {
-                                        let newFragment = SelectedFragment(
+                                        let newNote = Note(
                                             text: text,
                                             messageId: webViewModel.currentMessageId ?? "",
                                             conversationId: webViewModel.conversationId ?? "",
                                             timestamp: Date()
                                         )
-                                        fragmentToEdit = newFragment
+                                        noteToEdit = newNote
                                     }
                                 }
                             })
-                            ControlButtonView(icon: "list.bullet.clipboard.fill", color: .green, label: "Fragments", action: {
-                                showFragmentsSheet = true
+                            ControlButtonView(icon: "list.bullet.clipboard.fill", color: .green, label: "Notes", action: {
+                                showNoteSheet = true
                             })
                             ControlButtonView(icon: "magnifyingglass.circle.fill", color: .orange, label: "Search", action: {
                                 isSearchVisible.toggle()
@@ -148,14 +148,14 @@ struct ControlButtonsView: View {
         .sheet(isPresented: $showSystemPromptPicker) {
             SystemPromptPicker(showSystemPromptPicker: $showSystemPromptPicker, conversationWebViewModel: webViewModel)
         }
-        .sheet(isPresented: $showFragmentsSheet) {
-            SelectedFragmentsView()
-                .environmentObject(fragmentsStore)
+        .sheet(isPresented: $showNoteSheet) {
+            NotesView()
+                .environmentObject(notesStore)
                 .environmentObject(webViewModel)
         }
-        .sheet(item: $fragmentToEdit) { fragment in
-            EditFragmentView(fragment: fragment)
-                .environmentObject(fragmentsStore)
+        .sheet(item: $noteToEdit) { note in
+            EditNoteView(note: note)
+                .environmentObject(notesStore)
                 .environmentObject(webViewModel)
         }
         .onChange(of: textFiles) { _, newValue in

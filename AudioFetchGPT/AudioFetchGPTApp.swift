@@ -22,7 +22,7 @@ struct AudioFetchGPTApp: App {
             MainContentView()
                 .environmentObject(downloadedAudios)
                 .environmentObject(audioManager)
-                .environmentObject(SelectedFragmentsStore())
+                .environmentObject(NotesStore())
         }
     }
 }
