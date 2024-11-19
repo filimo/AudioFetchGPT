@@ -15,10 +15,12 @@ class SelectedFragmentsStore: ObservableObject {
     }
 
     func addFragment(text: String, messageId: String, conversationId: String) {
-        let fragment = SelectedFragment(text: text,
-                                        messageId: messageId,
-                                        conversationId: conversationId,
-                                        timestamp: Date())
+        let fragment = SelectedFragment(
+            text: text,
+            messageId: messageId,
+            conversationId: conversationId,
+            timestamp: Date()
+        )
         fragments.append(fragment)
     }
 

@@ -14,13 +14,15 @@ struct ControlButtonsView: View {
     var webViewModel: ConversationWebViewModel
     @Binding var isSearchVisible: Bool
     @Binding var searchText: String
+    @EnvironmentObject var fragmentsStore: SelectedFragmentsStore
+
     @State private var showMenu: Bool = false
     @State private var showDownloadConfirmation: Bool = false
     @State private var textFiles: [String] = []
     @State private var showDocumentPicker = false
     @State private var showSystemPromptPicker = false
     @State private var showFragmentsSheet = false
-    @StateObject private var fragmentsStore = SelectedFragmentsStore()
+    @State private var fragmentToEdit: SelectedFragment? = nil
 
     var body: some View {
         VStack {
@@ -53,11 +55,13 @@ struct ControlButtonsView: View {
                             ControlButtonView(icon: "text.quote", color: .blue, label: "Fragment", action: {
                                 webViewModel.getSelectedText { text in
                                     if let text = text, !text.isEmpty {
-                                        fragmentsStore.addFragment(
+                                        let newFragment = SelectedFragment(
                                             text: text,
                                             messageId: webViewModel.currentMessageId ?? "",
-                                            conversationId: webViewModel.conversationId ?? ""
+                                            conversationId: webViewModel.conversationId ?? "",
+                                            timestamp: Date()
                                         )
+                                        fragmentToEdit = newFragment
                                     }
                                 }
                             })
@@ -68,7 +72,7 @@ struct ControlButtonsView: View {
                                 isSearchVisible.toggle()
                                 if !isSearchVisible { searchText = "" }
                             })
-                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "Update", action: {
+                            ControlButtonView(icon: "arrow.clockwise.circle.fill", color: .green, label: "Refresh", action: {
                                 webViewModel.reload()
                             })
                         }
@@ -146,6 +150,11 @@ struct ControlButtonsView: View {
         }
         .sheet(isPresented: $showFragmentsSheet) {
             SelectedFragmentsView()
+                .environmentObject(fragmentsStore)
+                .environmentObject(webViewModel)
+        }
+        .sheet(item: $fragmentToEdit) { fragment in
+            EditFragmentView(fragment: fragment)
                 .environmentObject(fragmentsStore)
                 .environmentObject(webViewModel)
         }

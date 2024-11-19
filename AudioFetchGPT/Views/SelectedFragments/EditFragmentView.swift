@@ -59,13 +59,21 @@ struct EditFragmentView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
-                        fragmentsStore.updateFragment(SelectedFragment(
-                            id: fragment.id,
-                            text: editedText,
-                            messageId: fragment.messageId,
-                            conversationId: fragment.conversationId,
-                            timestamp: fragment.timestamp
-                        ))
+                        if fragmentsStore.fragments.contains(where: { $0.id == fragment.id }) {
+                            fragmentsStore.updateFragment(SelectedFragment(
+                                id: fragment.id,
+                                text: editedText,
+                                messageId: fragment.messageId,
+                                conversationId: fragment.conversationId,
+                                timestamp: fragment.timestamp
+                            ))
+                        } else {
+                            fragmentsStore.addFragment(
+                                text: editedText,
+                                messageId: fragment.messageId,
+                                conversationId: fragment.conversationId
+                            )
+                        }
                         dismiss()
                     }
                     .disabled(editedText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
