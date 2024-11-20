@@ -9,6 +9,9 @@ import SwiftUI
 struct SystemPromptPicker: View {
     @Binding var showSystemPromptPicker: Bool
     @ObservedObject var conversationWebViewModel: ConversationWebViewModel
+    
+    // Closure called when a prompt is selected
+    var onSelectPrompt: () -> Void
 
     @AppStorage("systemPrompts") private var systemPromptsData: String = "[]"
     @State private var systemPrompts: [SystemPromptModel] = []
@@ -32,52 +35,68 @@ struct SystemPromptPicker: View {
                 }
                 .padding(.vertical)
                 
-                List {
-                    Text("None")
-                        .font(.headline)
-                        .padding(.vertical, 5)
-                        .onTapGesture {
-                            conversationWebViewModel.systemPrompt = ""
-                            showSystemPromptPicker = false
-                        }
-                    
-                    ForEach(systemPrompts) { prompt in
-                        Text(prompt.value.replacingOccurrences(of: "\n", with: ""))
-                            .lineLimit(5)
-                            .truncationMode(.middle)
+                ScrollViewReader { proxy in
+                    List {
+                        Text("None")
                             .font(.headline)
                             .padding(.vertical, 5)
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    deletePrompt(prompt)
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
-                                }
-                            }
-                            .swipeActions(edge: .leading) {
-                                Button {
-                                    startEditing(prompt)
-                                } label: {
-                                    Label("Edit", systemImage: "pencil")
-                                }
-                                .tint(.blue)
-                            }
                             .onTapGesture {
-                                conversationWebViewModel.systemPrompt = "\(prompt.value)\n\n\n"
+                                conversationWebViewModel.systemPrompt = ""
                                 showSystemPromptPicker = false
                             }
+                            .id("None")
+                        
+                        ForEach(systemPrompts) { prompt in
+                            Text(prompt.value.replacingOccurrences(of: "\n", with: ""))
+                                .lineLimit(5)
+                                .truncationMode(.middle)
+                                .font(.headline)
+                                .padding(.vertical, 5)
+                                .background(conversationWebViewModel.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines) == prompt.value.trimmingCharacters(in: .whitespacesAndNewlines) ? Color.yellow.opacity(0.3) : Color.clear)
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        deletePrompt(prompt)
+                                    } label: {
+                                        Label("Delete", systemImage: "trash")
+                                    }
+                                }
+                                .swipeActions(edge: .leading) {
+                                    Button {
+                                        startEditing(prompt)
+                                    } label: {
+                                        Label("Edit", systemImage: "pencil")
+                                    }
+                                    .tint(.blue)
+                                }
+                                .onTapGesture {
+                                    conversationWebViewModel.systemPrompt = "\(prompt.value)\n\n\n"
+                                    showSystemPromptPicker = false
+                                    onSelectPrompt() // Call the closure when a prompt is selected
+                                }
+                                .id(prompt.id)
+                        }
+                        .onMove(perform: movePrompt)
                     }
-                    .onMove(perform: movePrompt)
-                }
-                .listStyle(PlainListStyle())
-                .navigationTitle("System Prompts")
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        EditButton()
+                    .listStyle(PlainListStyle())
+                    .navigationTitle("System Prompts")
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            EditButton()
+                        }
+                        // Adding a "Cancel" button to the toolbar
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            Button("Cancel") {
+                                showSystemPromptPicker = false
+                            }
+                        }
+                    }
+                    .onAppear {
+                        loadPrompts()
+                        // Scroll to the last selected prompt
+                        scrollToSelectedPrompt(proxy: proxy)
                     }
                 }
             }
-            .onAppear(perform: loadPrompts)
             .onChange(of: systemPrompts) { _, _ in
                 savePrompts()
             }
@@ -167,5 +186,21 @@ struct SystemPromptPicker: View {
     // Move prompts in the list
     private func movePrompt(from source: IndexSet, to destination: Int) {
         systemPrompts.move(fromOffsets: source, toOffset: destination)
+    }
+    
+    // Function to scroll to the selected prompt
+    private func scrollToSelectedPrompt(proxy: ScrollViewProxy) {
+        let selectedPrompt = systemPrompts.first { prompt in
+            conversationWebViewModel.systemPrompt.trimmingCharacters(in: .whitespacesAndNewlines) == prompt.value.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        if let prompt = selectedPrompt {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                proxy.scrollTo(prompt.id, anchor: .center)
+            }
+        } else {
+            // If "None" is selected, scroll to the first line
+            proxy.scrollTo("None", anchor: .top)
+        }
     }
 }

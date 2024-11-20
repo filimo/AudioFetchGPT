@@ -23,12 +23,18 @@ struct ControlButtonsView: View {
     @State private var showSystemPromptPicker = false
     @State private var showNoteSheet = false
     @State private var noteToEdit: Note? = nil
+    
+    // New state for storing the text to be sent after selecting the prompt
+    @State private var pendingChatGPTText: String? = nil
+    
+    // New state for tracking the confirmation of prompt selection
+    @State private var isPromptSelected: Bool = false
 
     var body: some View {
         VStack {
             Spacer()
             
-            // Панель с кнопками меню, если showMenu == true
+            // Panel with menu buttons if showMenu == true
             if showMenu {
                 HStack {
                     Spacer()
@@ -81,16 +87,22 @@ struct ControlButtonsView: View {
                         HStack(spacing: 10) {
                             ControlButtonView(icon: "gear", color: .blue, label: "System prompts", action: {
                                 showSystemPromptPicker = true
+                                // Reset the prompt selection state when opening the selector
+                                isPromptSelected = false
                             })
                             
                             ControlButtonView(icon: "doc.on.clipboard", color: .blue, label: "Clipboard", action: {
                                 if let clipboardText = UIPasteboard.general.string {
-                                    webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(clipboardText)")
+                                    // Set the text to be sent after selecting the prompt
+                                    pendingChatGPTText = clipboardText
+                                    showSystemPromptPicker = true
+                                    isPromptSelected = false
                                 }
                             })
                             
                             ControlButtonView(icon: "doc.text", color: .green, label: "File", action: {
                                 showDocumentPicker = true
+                                isPromptSelected = false
                             })
                         }
                         
@@ -145,8 +157,22 @@ struct ControlButtonsView: View {
         .sheet(isPresented: $showDocumentPicker) {
             DocumentPicker(textFiles: $textFiles)
         }
-        .sheet(isPresented: $showSystemPromptPicker) {
-            SystemPromptPicker(showSystemPromptPicker: $showSystemPromptPicker, conversationWebViewModel: webViewModel)
+        .sheet(isPresented: $showSystemPromptPicker, onDismiss: {
+            // After closing SystemPromptPicker, check if the prompt selection was confirmed
+            if isPromptSelected, let text = pendingChatGPTText {
+                let combinedText = "\(webViewModel.systemPrompt)\n\(text)"
+                webViewModel.sayChatGPT(combinedText)
+                pendingChatGPTText = nil
+                isPromptSelected = false
+            } else {
+                // If the selection was canceled, reset pendingChatGPTText
+                pendingChatGPTText = nil
+            }
+        }) {
+            SystemPromptPicker(showSystemPromptPicker: $showSystemPromptPicker, conversationWebViewModel: webViewModel) {
+                // Closure called when a prompt is selected
+                isPromptSelected = true
+            }
         }
         .sheet(isPresented: $showNoteSheet) {
             NotesView()
@@ -160,7 +186,10 @@ struct ControlButtonsView: View {
         }
         .onChange(of: textFiles) { _, newValue in
             if let value = newValue.first {
-                webViewModel.sayChatGPT("\(webViewModel.systemPrompt)\(value)")
+                // Set the text to be sent after selecting the prompt
+                pendingChatGPTText = value
+                showSystemPromptPicker = true
+                isPromptSelected = false
             }
             textFiles = []
         }
